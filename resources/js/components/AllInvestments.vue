@@ -15,22 +15,22 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="book in books" :key="book.id">
-                    <td>{{ book.id }}</td>
-                    <td>{{ book.name }}</td>
-                    <td>{{ book.author }}</td>
-                    <td>{{ book.created_at }}</td>
-                    <td>{{ book.updated_at }}</td>
+                <tr v-for="purchase in purchases" :key="purchase.id">
+                    <td>{{ purchase.id }}</td>
+                    <td>{{ purchase.name }}</td>
+                    <td>{{ purchase.shares }}</td>
+                    <td>{{ purchase.created_at }}</td>
+                    <td>{{ purchase.updated_at }}</td>
                     <td>
                         <div class="btn-group" role="group">
                             <router-link
-                                :to="{ name: 'edit', params: { id: book.id } }"
+                                :to="{ name: 'edit', params: { id: purchase.id } }"
                                 class="btn btn-primary"
                                 >Edit
                             </router-link>
                             <button
                                 class="btn btn-danger"
-                                @click="deleteBook(book.id)"
+                                @click="deletepurchase(purchase.id)"
                             >
                                 Delete
                             </button>
@@ -46,7 +46,7 @@
 export default {
     data() {
         return {
-            books: []
+            purchases: []
         };
     },
     created() {
@@ -55,19 +55,19 @@ export default {
 
         // console.log(axios);
 
-        // axios
-        //     .get('http://localhost:8000/api/books')
-        //     .then(response => {
-        //         this.books = response.data;
-        //     });
+        axios
+            .get('/api/purchases')
+            .then(response => {
+                this.purchases = response.data;
+            });
     },
     methods: {
-        // deleteBook(id) {
+        // deletepurchases(id) {
         //     this.axios
-        //         .delete(`http://localhost:8000/api/book/delete/${id}`)
+        //         .delete(`http://localhost:8000/api/purchases/delete/${id}`)
         //         .then(response => {
-        //             let i = this.books.map(item => item.id).indexOf(id); // find index of your object
-        //             this.books.splice(i, 1)
+        //             let i = this.purchasess.map(item => item.id).indexOf(id); // find index of your object
+        //             this.purchasess.splice(i, 1)
         //         });
         // }
     }

@@ -1987,24 +1987,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      books: []
+      purchases: []
     };
   },
   created: function created() {
+    var _this = this;
+
     var api_url = "IS416YG0BX5SBRJW";
     console.log(api_url); // console.log(axios);
-    // axios
-    //     .get('http://localhost:8000/api/books')
-    //     .then(response => {
-    //         this.books = response.data;
-    //     });
+
+    axios.get('/api/purchases').then(function (response) {
+      _this.purchases = response.data;
+    });
   },
-  methods: {// deleteBook(id) {
+  methods: {// deletepurchases(id) {
     //     this.axios
-    //         .delete(`http://localhost:8000/api/book/delete/${id}`)
+    //         .delete(`http://localhost:8000/api/purchases/delete/${id}`)
     //         .then(response => {
-    //             let i = this.books.map(item => item.id).indexOf(id); // find index of your object
-    //             this.books.splice(i, 1)
+    //             let i = this.purchasess.map(item => item.id).indexOf(id); // find index of your object
+    //             this.purchasess.splice(i, 1)
     //         });
     // }
   }
@@ -37641,17 +37642,17 @@ var render = function() {
       _vm._v(" "),
       _c(
         "tbody",
-        _vm._l(_vm.books, function(book) {
-          return _c("tr", { key: book.id }, [
-            _c("td", [_vm._v(_vm._s(book.id))]),
+        _vm._l(_vm.purchases, function(purchase) {
+          return _c("tr", { key: purchase.id }, [
+            _c("td", [_vm._v(_vm._s(purchase.id))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(book.name))]),
+            _c("td", [_vm._v(_vm._s(purchase.name))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(book.author))]),
+            _c("td", [_vm._v(_vm._s(purchase.shares))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(book.created_at))]),
+            _c("td", [_vm._v(_vm._s(purchase.created_at))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(book.updated_at))]),
+            _c("td", [_vm._v(_vm._s(purchase.updated_at))]),
             _vm._v(" "),
             _c("td", [
               _c(
@@ -37662,7 +37663,9 @@ var render = function() {
                     "router-link",
                     {
                       staticClass: "btn btn-primary",
-                      attrs: { to: { name: "edit", params: { id: book.id } } }
+                      attrs: {
+                        to: { name: "edit", params: { id: purchase.id } }
+                      }
                     },
                     [_vm._v("Edit\n                        ")]
                   ),
@@ -37673,7 +37676,7 @@ var render = function() {
                       staticClass: "btn btn-danger",
                       on: {
                         click: function($event) {
-                          return _vm.deleteBook(book.id)
+                          return _vm.deletepurchase(purchase.id)
                         }
                       }
                     },
