@@ -24,7 +24,10 @@
                     <td>
                         <div class="btn-group" role="group">
                             <router-link
-                                :to="{ name: 'edit', params: { id: purchase.id } }"
+                                :to="{
+                                    name: 'edit',
+                                    params: { id: purchase.id }
+                                }"
                                 class="btn btn-primary"
                                 >Edit
                             </router-link>
@@ -50,16 +53,10 @@ export default {
         };
     },
     created() {
-        let api_url = process.env.MIX_ALPHA_API_KEY;
-        console.log(api_url);
-
-        // console.log(axios);
-
-        axios
-            .get('/api/purchases')
-            .then(response => {
-                this.purchases = response.data;
-            });
+        // let api_url = process.env.MIX_ALPHA_API_KEY;
+        axios.get("/api/purchases").then(response => {
+            this.purchases = response.data;
+        });
     },
     methods: {
         // deletepurchases(id) {

@@ -1,22 +1,44 @@
 <template>
-    <div class="container">
-        <div class="text-center" style="margin: 20px 0px 20px 0px;">
-            <span class="text-secondary">Portfolio</span>
-        </div>
+    <v-app>
+        <v-app-bar app dense flat>
+            <v-toolbar-title
+                ><router-link to="/">
+                    <v-img
+                        :src="image_src"
+                        width="100%"
+                        max-width="120"
+                        contain
+                    ></v-img> </router-link
+            ></v-toolbar-title>
+        </v-app-bar>
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="collapse navbar-collapse">
-                <div class="navbar-nav">
-                    <router-link to="/" class="nav-item nav-link">Home</router-link>
-                    <router-link to="/add" class="nav-item nav-link">Add Book</router-link>
-                </div>
-            </div>
-        </nav>
-        <br/>
-        <router-view></router-view>
-    </div>
+        <!-- Sizes your content based upon application components -->
+        <v-main>
+            <!-- Provides the application the proper gutter -->
+            <v-container fluid>
+                <!-- If using vue-router -->
+                <router-view></router-view>
+            </v-container>
+        </v-main>
+
+        <v-footer app>
+            <v-card-text class="py-0 px-0 white--text">
+                Investment Portfolio, &copy; Copyright
+                {{ new Date().getFullYear() }}
+            </v-card-text>
+        </v-footer>
+    </v-app>
 </template>
 
 <script>
-    export default {}
+export default {
+    data() {
+        return {
+            image_src: require("./assets/logo.png")
+        };
+    },
+    created() {
+        this.$vuetify.theme.dark = true;
+    }
+};
 </script>

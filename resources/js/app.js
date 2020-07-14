@@ -24,9 +24,11 @@ window.Vue = require('vue');
 
 import App from "./App.vue";
 import VueRouter from "vue-router";
+import Vuetify from "vuetify";
 import { routes } from "./routes";
 
 Vue.use(VueRouter);
+Vue.use(Vuetify);
 
 const router = new VueRouter({
     mode: "history",
@@ -42,5 +44,6 @@ const router = new VueRouter({
 const app = new Vue({
     el: "#app",
     router: router,
-    render: (h) => h(App),
+    render: h => h(App),
+    vuetify: new Vuetify()
 });

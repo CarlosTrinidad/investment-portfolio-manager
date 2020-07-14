@@ -1,9 +1,9 @@
-import AllInvestments from "./components/AllInvestments.vue";
+import AllPurchases from "./components/AllPurchases.vue";
 
 export const routes = [
     {
         name: "home",
         path: "/",
-        component: AllInvestments
+        component: AllPurchases
     }
 ];
