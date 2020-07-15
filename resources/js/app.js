@@ -35,6 +35,19 @@ const router = new VueRouter({
     routes: routes,
 });
 
+// FIlters
+Vue.filter("toCurrency", function(value) {
+    if (typeof value !== "number") {
+        return value;
+    }
+    var formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2
+    });
+    return formatter.format(value);
+});
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -45,5 +58,15 @@ const app = new Vue({
     el: "#app",
     router: router,
     render: h => h(App),
-    vuetify: new Vuetify()
+    vuetify: new Vuetify({
+        theme: {
+            themes: {
+                dark: {
+                    primary: "#42E2B8",
+                    secondary: "#B6d65F",
+                    accent: "#725Ac1",
+                }
+            }
+        }
+    })
 });

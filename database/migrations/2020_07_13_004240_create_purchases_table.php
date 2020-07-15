@@ -20,7 +20,7 @@ class CreatePurchasesTable extends Migration
             $table->text('description');
             $table->integer('shares');
             $table->decimal('buy_price', 10, 2);
-            $table->dateTime('purchase_date');
+            $table->date('purchase_date');
             $table->timestamps();
             // TODO: Uncomment when login is
             // $table->biginteger('user_id')->unsigned(); 

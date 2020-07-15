@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <v-app class="dark">
         <v-app-bar app dense flat>
             <v-toolbar-title
                 ><router-link to="/">
@@ -34,7 +34,7 @@
 export default {
     data() {
         return {
-            image_src: require("./assets/logo.png")
+            image_src: require("./components/assets/logo.png")
         };
     },
     created() {
