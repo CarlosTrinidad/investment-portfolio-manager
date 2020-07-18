@@ -17,7 +17,7 @@ class CreatePurchasesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('symbol', 10);
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->integer('shares');
             $table->decimal('buy_price', 10, 2);
             $table->date('purchase_date');

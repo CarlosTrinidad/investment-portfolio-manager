@@ -20,6 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::get('purchases', 'PurchaseController@index');
+Route::get('purchases/grouped', 'PurchaseController@grouped');
 Route::get('purchases/{purchase}', 'PurchaseController@show');
 Route::post('purchases', 'PurchaseController@store');
 Route::put('purchases/{purchase}', 'PurchaseController@update');

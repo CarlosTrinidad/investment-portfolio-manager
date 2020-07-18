@@ -11,9 +11,22 @@ class PurchaseController extends Controller
     /**
      * List all purchases
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Purchase::all();
+        $purchases = Purchase::filter()->orderByDesc('symbol')->get();
+        return $purchases;
+    }
+
+    /**
+     * List all purchases
+     */
+    public function grouped()
+    {
+        // return Purchase::all();
+
+        return Purchase::selectRaw('purchases.*, SUM(shares) total_shares, SUM(shares*buy_price)/ SUM(shares) average_buy_price')
+            ->groupBy('symbol')
+            ->get();
     }
 
     /**

@@ -48,6 +48,16 @@ Vue.filter("toCurrency", function(value) {
     return formatter.format(value);
 });
 
+Vue.filter("toDecimal", function(value) {
+    if (typeof value !== "number") {
+        return value;
+    }
+    var formatter = new Intl.NumberFormat("en-US", {
+        style: "decimal",
+    });
+    return formatter.format(value);
+});
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
