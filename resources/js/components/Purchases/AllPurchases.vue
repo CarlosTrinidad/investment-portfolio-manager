@@ -29,16 +29,49 @@
                             :lazy-validation="true"
                             @submit.prevent
                             id="purchase-form"
+                            @keyup.native.enter="submit"
                         >
                             <v-container>
                                 <v-row>
                                     <v-col cols="12" sm="6" md="4">
-                                        <v-text-field
+                                        <v-combobox
                                             v-model="form.inputs.symbol"
-                                            required
-                                            :rules="form.rules.symbol"
+                                            :loading="marketQuery.loading"
+                                            :items="marketQuery.items"
+                                            :search-input.sync="
+                                                marketQuery.search
+                                            "
+                                            cache-items
+                                            flat
                                             label="Symbol*"
-                                        ></v-text-field>
+                                            :rules="form.rules.symbol"
+                                            item-text="symbol"
+                                            item-value="symbol"
+                                            :return-object="false"
+                                        >
+                                            <template v-slot:item="data">
+                                                <template>
+                                                    <v-list-item-content
+                                                        @click="
+                                                            selectSymbol(
+                                                                data.item
+                                                            )
+                                                        "
+                                                    >
+                                                        <v-list-item-title
+                                                            v-html="
+                                                                data.item.symbol
+                                                            "
+                                                        ></v-list-item-title>
+                                                        <v-list-item-subtitle
+                                                            v-html="
+                                                                data.item.name
+                                                            "
+                                                        ></v-list-item-subtitle>
+                                                    </v-list-item-content>
+                                                </template>
+                                            </template>
+                                        </v-combobox>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="8">
                                         <v-text-field
@@ -156,18 +189,88 @@
                 :disable-pagination="true"
                 :hide-default-footer="true"
                 :fixed-header="true"
-                :calculate-widths="true"
+                :calculate-widths="false"
                 :loading="loading"
                 show-expand
                 :expanded.sync="expanded"
                 @item-expanded="getDetail"
                 item-key="id"
             >
+                <template v-slot:body.append>
+                    <tr>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>
+                            {{ Number(aggregated.total_shares) | toDecimal }}
+                        </td>
+                        <td>-</td>
+                        <td>-</td>
+
+                        <td>
+                            {{ Number(aggregated.cost_basis) | toCurrency }}
+                        </td>
+                        <td>
+                            {{ Number(aggregated.market_value) | toCurrency }}
+                        </td>
+                        <td>
+                            <span
+                                v-bind:class="
+                                    getConditionalFormat(aggregated.gain_loss)
+                                "
+                            >
+                                {{ Number(aggregated.gain_loss) | toCurrency }}
+                            </span>
+                        </td>
+                        <td>
+                            <span
+                                v-bind:class="
+                                    getConditionalFormat(aggregated.growth)
+                                "
+                            >
+                                {{ Number(aggregated.growth) | toCurrency }}
+                            </span>
+                        </td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>
+                            {{ Number(aggregated.anual_income) | toCurrency }}
+                        </td>
+                    </tr>
+                </template>
                 <template v-slot:item.total_shares="{ item }">
                     {{ Number(item.total_shares) | toDecimal }}
                 </template>
                 <template v-slot:item.average_buy_price="{ item }">
                     {{ Number(item.average_buy_price) | toCurrency }}
+                </template>
+                <template v-slot:item.market_price="{ item }">
+                    {{ Number(item.market_price) | toCurrency }}
+                </template>
+                <template v-slot:item.cost_basis="{ item }">
+                    {{ Number(item.cost_basis) | toCurrency }}
+                </template>
+                <template v-slot:item.market_value="{ item }">
+                    {{ Number(item.market_value) | toCurrency }}
+                </template>
+                <template v-slot:item.gain_loss="{ item }">
+                    <span v-bind:class="getConditionalFormat(item.gain_loss)">{{
+                        Number(item.gain_loss) | toCurrency
+                    }}</span>
+                </template>
+                <template v-slot:item.growth="{ item }">
+                    <span v-bind:class="getConditionalFormat(item.growth)"
+                        >{{ Number(item.growth) | toDecimal }}%</span
+                    >
+                </template>
+                <template v-slot:item.anual_dividend="{ item }">
+                    {{ Number(item.anual_dividend) | toCurrency }}
+                </template>
+                <template v-slot:item.dividend_yield="{ item }">
+                    {{ Number(item.dividend_yield) | toDecimal }}%
+                </template>
+                <template v-slot:item.anual_income="{ item }">
+                    {{ Number(item.anual_income) | toCurrency }}
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <fragment v-if="item.detail.length === 0">
@@ -185,6 +288,17 @@
 
                     <fragment v-else>
                         <td :colspan="headers.length" class="no-padding">
+                            <div class="transition-swing text-h6 pa-4 ml-5">
+                                {{ item.name }}
+                                <v-chip
+                                    v-if="item.description.length > 0"
+                                    class="ma-2"
+                                    small
+                                    outlined
+                                >
+                                    {{ item.description }}
+                                </v-chip>
+                            </div>
                             <v-simple-table class="expanded-row">
                                 <template v-slot:default>
                                     <tbody>
@@ -196,7 +310,7 @@
                                             "
                                         >
                                             <td width="56px"></td>
-                                            <td width="165px">
+                                            <td width="225px">
                                                 {{ line.name }}
                                             </td>
                                             <td width="120px">
@@ -246,14 +360,11 @@
         </v-menu>
         <v-dialog v-model="confirmDeleteDialog" max-width="290">
             <v-card>
-                <v-card-title class="headline"
-                    >Use Google's location service?</v-card-title
-                >
+                <v-card-title class="headline">Delete purchase?</v-card-title>
 
                 <v-card-text>
-                    Let Google help apps determine location. This means sending
-                    anonymous location data to Google, even when no apps are
-                    running.
+                    This action will permanently remove this purchase from your
+                    portfolio. Do you want to continue?
                 </v-card-text>
 
                 <v-card-actions>
@@ -272,228 +383,5 @@
     </v-row>
 </template>
 
-<script>
-import { Fragment } from "vue-fragment";
-
-export default {
-    components: { Fragment },
-
-    data() {
-        return {
-            confirmDeleteDialog: false,
-            showMenu: false,
-            x: 0,
-            y: 0,
-            selected: {},
-            expanded: [],
-            componentKey: 0,
-            snackbar: {
-                show: false,
-                color: "",
-                mode: "multi-line",
-                text: "",
-                timeout: 2500,
-                x: "right",
-                y: "top"
-            },
-            showDatePicker: false,
-            form: {
-                valid: true,
-                inputs: {
-                    symbol: "",
-                    shares: "",
-                    buy_price: "",
-                    name: "",
-                    description: "",
-                    purchase_date: new Date().toISOString().substr(0, 10)
-                },
-                rules: {
-                    symbol: [v => !!v || "Symbol is required"],
-                    name: [v => !!v || "Company name is required"],
-                    shares: [
-                        v => !!v || "Shares is required",
-                        v => v > 0 || "Shares should be greather than zero"
-                    ],
-                    buy_price: [
-                        v => !!v || "Buy price is required",
-                        v => v > 0 || "Buy prince should be greather than zero"
-                    ]
-                }
-            },
-            dialog: false,
-            headers: [
-                {
-                    text: "Company name",
-                    align: "start",
-                    value: "name",
-                    width: "165px"
-                },
-                { text: "Symbol", value: "symbol", width: "120px" },
-                { text: "Shares", value: "total_shares", width: "110px" },
-                {
-                    text: "Avg. Buy Price",
-                    value: "average_buy_price",
-                    width: "155px"
-                },
-                { text: "Market Price", value: "description", width: "155px" },
-                { text: "Cost Basis", value: "description", width: "145px" },
-                { text: "Market Value", value: "description", width: "145px" },
-                { text: "Gain/Loss", value: "description", width: "130px" },
-                { text: "Growth", value: "description", width: "130px" },
-                {
-                    text: "Annual Dividend",
-                    value: "description",
-                    width: "170px"
-                },
-                {
-                    text: "Dividend Yield",
-                    value: "description",
-                    width: "155px"
-                },
-                { text: "Yield on Cost", value: "description", width: "150px" },
-                { text: "Anual Income", value: "description", width: "160px" }
-            ],
-            purchases: [],
-            loading: true
-        };
-    },
-    created() {
-        this.getGroupedPurchases();
-    },
-    methods: {
-        getGroupedPurchases() {
-            axios.get("/api/purchases/grouped").then(response => {
-                this.purchases = response.data.map(item => {
-                    return {
-                        detail: [],
-                        ...item
-                    };
-                });
-                this.loading = false;
-            });
-        },
-        getDetail({ item }) {
-            if (item.detail.length === 0) {
-                let indexSymbol = this.purchases.findIndex(element => {
-                    return element.symbol === item.symbol;
-                });
-
-                if (indexSymbol !== -1) {
-                    axios
-                        .get("/api/purchases", {
-                            params: {
-                                symbol: item.symbol
-                            }
-                        })
-                        .then(response => {
-                            let newData = this.purchases[indexSymbol];
-                            newData["detail"] = response.data;
-                            this.purchases[indexSymbol] = Object.assign(
-                                {},
-                                this.purchases[indexSymbol],
-                                {
-                                    detail: response.data
-                                }
-                            );
-                        });
-                }
-            }
-        },
-        submit() {
-            if (this.$refs.form.validate()) {
-                axios
-                    .post("/api/purchases", this.form.inputs)
-                    .then(response => {
-                        if (response.status === 201) {
-                            this.snackbar = {
-                                ...this.snackbar,
-                                show: true,
-                                text: "Purchase saved correctly",
-                                color: "success"
-                            };
-                            this.dialog = false;
-                            this.$refs.form.reset();
-                            this.getGroupedPurchases();
-                        } else {
-                            this.snackbar = {
-                                ...this.snackbar,
-                                show: true,
-                                text: "Purchase could not be saved, try again",
-                                color: "error"
-                            };
-                        }
-                    })
-                    .catch(error => {
-                        this.snackbar = {
-                            ...this.snackbar,
-                            show: true,
-                            text: "Purchase could not be saved, try again",
-                            color: "error"
-                        };
-                    });
-            }
-        },
-        deletePurchase() {
-            axios
-                .delete(`/api/purchases/${this.selected.id}`)
-                .then(response => {
-                    if (response.status === 204) {
-                        this.snackbar = {
-                            ...this.snackbar,
-                            show: true,
-                            text: "Purchase deleted"
-                        };
-                        this.confirmDeleteDialog = false;
-                        this.selected = {};
-                        this.expanded = [];
-                        this.getGroupedPurchases();
-                    } else {
-                        this.snackbar = {
-                            ...this.snackbar,
-                            show: true,
-                            text:
-                                "Purchase action could not be completed, try again",
-                            color: "error"
-                        };
-                    }
-                })
-                .catch(error => {
-                    this.snackbar = {
-                        ...this.snackbar,
-                        show: true,
-                        text:
-                            "Purchase action could not be completed, try again",
-                        color: "error"
-                    };
-                });
-        },
-        confirmDelete() {
-            this.confirmDeleteDialog = true;
-        },
-        openEdit() {},
-        close() {
-            this.dialog = false;
-            this.$refs.form.resetValidation();
-        },
-        contextMenu(e, item) {
-            e.preventDefault();
-            this.showMenu = false;
-            this.x = e.clientX;
-            this.y = e.clientY;
-            this.selected = item;
-            this.$nextTick(() => {
-                this.showMenu = true;
-            });
-        }
-    }
-};
-</script>
-
-<style scoped>
-.no-padding {
-    padding: 0 !important;
-}
-.expanded-row {
-    background-color: #151515 !important;
-}
-</style>
+<script src="./AllPurchases.js"></script>
+<style src="./AllPurchases.css" scoped></style>

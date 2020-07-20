@@ -1,4 +1,4 @@
-import AllPurchases from "./components/AllPurchases.vue";
+import AllPurchases from "./components/Purchases/AllPurchases.vue";
 
 export const routes = [
     {

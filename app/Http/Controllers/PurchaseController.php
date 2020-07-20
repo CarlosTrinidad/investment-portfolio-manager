@@ -13,7 +13,7 @@ class PurchaseController extends Controller
      */
     public function index(Request $request)
     {
-        $purchases = Purchase::filter()->orderByDesc('symbol')->get();
+        $purchases = Purchase::filter()->orderBy('name', 'asc')->get();
         return $purchases;
     }
 
@@ -25,6 +25,7 @@ class PurchaseController extends Controller
         // return Purchase::all();
 
         return Purchase::selectRaw('purchases.*, SUM(shares) total_shares, SUM(shares*buy_price)/ SUM(shares) average_buy_price')
+            ->orderBy('name', 'asc')
             ->groupBy('symbol')
             ->get();
     }

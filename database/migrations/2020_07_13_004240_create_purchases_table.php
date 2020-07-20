@@ -15,8 +15,8 @@ class CreatePurchasesTable extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->string('symbol', 10);
+            $table->text('name');
+            $table->string('symbol', 100);
             $table->text('description')->nullable();
             $table->integer('shares');
             $table->decimal('buy_price', 10, 2);
