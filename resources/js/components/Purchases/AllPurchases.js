@@ -6,6 +6,7 @@ export default {
 
     data() {
         return {
+            assetClasses: [],
             confirmDeleteDialog: false,
             showMenu: false,
             x: 0,
@@ -99,7 +100,7 @@ export default {
         };
     },
     created() {
-        this.getGroupedPurchases();
+        this.getGroupedPurchases(), this.getAssetClasses();
     },
     watch: {
         purchases: {
@@ -207,7 +208,8 @@ export default {
                                     Number(this.purchases[index].market_value) *
                                     (Number(
                                         this.purchases[index].dividend_yield
-                                    )/100);
+                                    ) /
+                                        100);
                             });
                         }
                     })
@@ -256,6 +258,11 @@ export default {
                         this.marketQuery.loading = false;
                     });
             }
+        },
+        getAssetClasses() {
+            axios.get("/api/asset-classes").then(response => {
+                this.assetClasses = response.data
+            });
         },
         getGroupedPurchases() {
             axios.get("/api/purchases/grouped").then(response => {

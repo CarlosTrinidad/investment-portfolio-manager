@@ -105,13 +105,24 @@
                                         <v-text-field
                                             v-model="form.inputs.buy_price"
                                             :rules="form.rules.buy_price"
-                                            label="Buy Price*"
+                                            label="Buy price*"
                                             type="number"
                                             hint="average price"
                                             prepend-inner-icon="mdi-currency-usd"
                                             required
                                         ></v-text-field>
                                     </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <v-select
+                                            :items="assetClasses"
+                                            label="Asset class"
+                                            item-text="name"
+                                            item-value="id"
+                                            flat
+                                        ></v-select>
+                                    </v-col>
+                                    <v-col cols="12" sm="6"> </v-col>
+
                                     <v-col cols="12" sm="6">
                                         <v-menu
                                             v-model="showDatePicker"
@@ -297,6 +308,14 @@
                                     outlined
                                 >
                                     {{ item.description }}
+                                </v-chip>
+                                <v-chip
+                                    v-if="!!item.asset_class"
+                                    class="ma-2"
+                                    small
+                                    outlined
+                                >
+                                    {{ item.asset_class }}
                                 </v-chip>
                             </div>
                             <v-simple-table class="expanded-row">

@@ -25,3 +25,9 @@ Route::get('purchases/{purchase}', 'PurchaseController@show');
 Route::post('purchases', 'PurchaseController@store');
 Route::put('purchases/{purchase}', 'PurchaseController@update');
 Route::delete('purchases/{purchase}', 'PurchaseController@delete');
+
+Route::get('asset-classes', 'AssetClassController@index');
+Route::get('asset-classes/{purchase}', 'AssetClassController@show');
+Route::post('asset-classes', 'AssetClassController@store');
+Route::put('asset-classes/{purchase}', 'AssetClassController@update');
+Route::delete('asset-classes/{purchase}', 'AssetClassController@delete');

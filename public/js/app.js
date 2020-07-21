@@ -3095,6 +3095,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   },
   data: function data() {
     return {
+      assetClasses: [],
       confirmDeleteDialog: false,
       showMenu: false,
       x: 0,
@@ -3213,7 +3214,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     };
   },
   created: function created() {
-    this.getGroupedPurchases();
+    this.getGroupedPurchases(), this.getAssetClasses();
   },
   watch: {
     purchases: {
@@ -3330,11 +3331,18 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         });
       }
     },
-    getGroupedPurchases: function getGroupedPurchases() {
+    getAssetClasses: function getAssetClasses() {
       var _this4 = this;
 
+      axios.get("/api/asset-classes").then(function (response) {
+        _this4.assetClasses = response.data;
+      });
+    },
+    getGroupedPurchases: function getGroupedPurchases() {
+      var _this5 = this;
+
       axios.get("/api/purchases/grouped").then(function (response) {
-        _this4.purchases = response.data.map(function (item) {
+        _this5.purchases = response.data.map(function (item) {
           return _objectSpread({
             detail: [],
             market_price: 0,
@@ -3348,15 +3356,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           }, item);
         });
 
-        _this4.getMarketQuotes(_this4.purchases.map(function (el) {
+        _this5.getMarketQuotes(_this5.purchases.map(function (el) {
           return el.symbol;
         }).join(","));
 
-        _this4.loading = false;
+        _this5.loading = false;
       });
     },
     getDetail: function getDetail(_ref) {
-      var _this5 = this;
+      var _this6 = this;
 
       var item = _ref.item;
 
@@ -3371,9 +3379,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               symbol: item.symbol
             }
           }).then(function (response) {
-            var newData = _this5.purchases[indexSymbol];
+            var newData = _this6.purchases[indexSymbol];
             newData["detail"] = response.data;
-            _this5.purchases[indexSymbol] = Object.assign({}, _this5.purchases[indexSymbol], {
+            _this6.purchases[indexSymbol] = Object.assign({}, _this6.purchases[indexSymbol], {
               detail: response.data
             });
           });
@@ -3381,54 +3389,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     },
     create: function create() {
-      var _this6 = this;
+      var _this7 = this;
 
       if (this.$refs.form.validate()) {
         axios.post("/api/purchases", this.form.inputs).then(function (response) {
           if (response.status === 201) {
-            _this6.snackbar = _objectSpread(_objectSpread({}, _this6.snackbar), {}, {
+            _this7.snackbar = _objectSpread(_objectSpread({}, _this7.snackbar), {}, {
               show: true,
               text: "Purchase saved correctly",
               color: "success"
             });
-            _this6.dialog = false;
-            _this6.selected = {};
-            _this6.expanded = [];
-
-            _this6.$refs.form.resetValidation();
-
-            _this6.$refs.form.reset();
-
-            _this6.getGroupedPurchases();
-          } else {
-            _this6.snackbar = _objectSpread(_objectSpread({}, _this6.snackbar), {}, {
-              show: true,
-              text: "Purchase could not be saved, try again",
-              color: "error"
-            });
-          }
-        })["catch"](function (error) {
-          _this6.snackbar = _objectSpread(_objectSpread({}, _this6.snackbar), {}, {
-            show: true,
-            text: "Purchase could not be saved, try again",
-            color: "error"
-          });
-        });
-      }
-    },
-    update: function update() {
-      var _this7 = this;
-
-      if (this.$refs.form.validate()) {
-        axios.put("/api/purchases/".concat(this.selected.id), this.form.inputs).then(function (response) {
-          if (response.status === 200) {
-            _this7.snackbar = _objectSpread(_objectSpread({}, _this7.snackbar), {}, {
-              show: true,
-              text: "Purchase updated correctly",
-              color: "success"
-            });
             _this7.dialog = false;
-            _this7.form.edit = false;
             _this7.selected = {};
             _this7.expanded = [];
 
@@ -3453,29 +3424,66 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         });
       }
     },
-    deletePurchase: function deletePurchase() {
+    update: function update() {
       var _this8 = this;
+
+      if (this.$refs.form.validate()) {
+        axios.put("/api/purchases/".concat(this.selected.id), this.form.inputs).then(function (response) {
+          if (response.status === 200) {
+            _this8.snackbar = _objectSpread(_objectSpread({}, _this8.snackbar), {}, {
+              show: true,
+              text: "Purchase updated correctly",
+              color: "success"
+            });
+            _this8.dialog = false;
+            _this8.form.edit = false;
+            _this8.selected = {};
+            _this8.expanded = [];
+
+            _this8.$refs.form.resetValidation();
+
+            _this8.$refs.form.reset();
+
+            _this8.getGroupedPurchases();
+          } else {
+            _this8.snackbar = _objectSpread(_objectSpread({}, _this8.snackbar), {}, {
+              show: true,
+              text: "Purchase could not be saved, try again",
+              color: "error"
+            });
+          }
+        })["catch"](function (error) {
+          _this8.snackbar = _objectSpread(_objectSpread({}, _this8.snackbar), {}, {
+            show: true,
+            text: "Purchase could not be saved, try again",
+            color: "error"
+          });
+        });
+      }
+    },
+    deletePurchase: function deletePurchase() {
+      var _this9 = this;
 
       axios["delete"]("/api/purchases/".concat(this.selected.id)).then(function (response) {
         if (response.status === 204) {
-          _this8.snackbar = _objectSpread(_objectSpread({}, _this8.snackbar), {}, {
+          _this9.snackbar = _objectSpread(_objectSpread({}, _this9.snackbar), {}, {
             show: true,
             text: "Purchase deleted"
           });
-          _this8.confirmDeleteDialog = false;
-          _this8.selected = {};
-          _this8.expanded = [];
+          _this9.confirmDeleteDialog = false;
+          _this9.selected = {};
+          _this9.expanded = [];
 
-          _this8.getGroupedPurchases();
+          _this9.getGroupedPurchases();
         } else {
-          _this8.snackbar = _objectSpread(_objectSpread({}, _this8.snackbar), {}, {
+          _this9.snackbar = _objectSpread(_objectSpread({}, _this9.snackbar), {}, {
             show: true,
             text: "Purchase action could not be completed, try again",
             color: "error"
           });
         }
       })["catch"](function (error) {
-        _this8.snackbar = _objectSpread(_objectSpread({}, _this8.snackbar), {}, {
+        _this9.snackbar = _objectSpread(_objectSpread({}, _this9.snackbar), {}, {
           show: true,
           text: "Purchase action could not be completed, try again",
           color: "error"
@@ -3512,7 +3520,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.$refs.form.reset();
     },
     contextMenu: function contextMenu(e, item) {
-      var _this9 = this;
+      var _this10 = this;
 
       e.preventDefault();
       this.showMenu = false;
@@ -3520,7 +3528,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.y = e.clientY;
       this.selected = item;
       this.$nextTick(function () {
-        _this9.showMenu = true;
+        _this10.showMenu = true;
       });
     },
     selectSymbol: function selectSymbol(item) {
@@ -22485,7 +22493,7 @@ var render = function() {
                                       _c("v-text-field", {
                                         attrs: {
                                           rules: _vm.form.rules.buy_price,
-                                          label: "Buy Price*",
+                                          label: "Buy price*",
                                           type: "number",
                                           hint: "average price",
                                           "prepend-inner-icon":
@@ -22507,6 +22515,27 @@ var render = function() {
                                     ],
                                     1
                                   ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "6" } },
+                                    [
+                                      _c("v-select", {
+                                        attrs: {
+                                          items: _vm.assetClasses,
+                                          label: "Asset class",
+                                          "item-text": "name",
+                                          "item-value": "id",
+                                          flat: ""
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("v-col", {
+                                    attrs: { cols: "12", sm: "6" }
+                                  }),
                                   _vm._v(" "),
                                   _c(
                                     "v-col",
@@ -23057,6 +23086,23 @@ var render = function() {
                                           _vm._v(
                                             "\n                                " +
                                               _vm._s(item.description) +
+                                              "\n                            "
+                                          )
+                                        ]
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  !!item.asset_class
+                                    ? _c(
+                                        "v-chip",
+                                        {
+                                          staticClass: "ma-2",
+                                          attrs: { small: "", outlined: "" }
+                                        },
+                                        [
+                                          _vm._v(
+                                            "\n                                " +
+                                              _vm._s(item.asset_class) +
                                               "\n                            "
                                           )
                                         ]
@@ -82304,12 +82350,12 @@ var cache = new axios_extensions__WEBPACK_IMPORTED_MODULE_0__["Cache"]({
   max: 100
 });
 var http = axios__WEBPACK_IMPORTED_MODULE_1___default.a.create({
-  baseURL: "https://apidojo-yahoo-finance-v1.p.rapidapi.com",
+  // baseURL: process.env.MIX_YAHOO_FINANCE_URL,
   headers: {
     "Cache-Control": "no-cache",
     "content-type": "application/octet-stream",
     "x-rapidapi-host": "apidojo-yahoo-finance-v1.p.rapidapi.com",
-    "x-rapidapi-key": "e53ecee273msh9fd44b513b146bep16f20cjsnf62882f01a9e",
+    // "x-rapidapi-key": process.env.MIX_YAHOO_FINANCE_APIK_KEY,
     useQueryString: true
   },
   // cache will be enabled by default

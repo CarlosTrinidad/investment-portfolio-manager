@@ -11,9 +11,9 @@ class PurchaseController extends Controller
     /**
      * List all purchases
      */
-    public function index(Request $request)
+    public function index()
     {
-        $purchases = Purchase::filter()->orderBy('name', 'asc')->get();
+        $purchases = Purchase::filter()->orderBy('name', 'asc')->with("assetClass")->get();
         return $purchases;
     }
 
