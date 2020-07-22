@@ -15,7 +15,8 @@ class Purchase extends Model
         'description',
         'shares',
         'buy_price',
-        'purchase_date'
+        'purchase_date',
+        'asset_class_id'
     ];
 
     private static $whiteListFilter = ['*'];

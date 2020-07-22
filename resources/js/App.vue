@@ -10,6 +10,16 @@
                         contain
                     ></v-img> </router-link
             ></v-toolbar-title>
+
+            <v-tabs v-model="model" right>
+                <v-tab href="#tab-1">
+                    Normal
+                </v-tab>
+                <v-tab href="#tab-22">
+                    Test
+                </v-tab>
+            </v-tabs>
+            
         </v-app-bar>
 
         <!-- Sizes your content based upon application components -->
@@ -34,6 +44,7 @@
 export default {
     data() {
         return {
+            model: "tab-1",
             image_src: require("./components/assets/logo.png")
         };
     },

@@ -114,11 +114,19 @@
                                     </v-col>
                                     <v-col cols="12" sm="6">
                                         <v-select
+                                            v-model="form.inputs.asset_class_id"
                                             :items="assetClasses"
                                             label="Asset class"
                                             item-text="name"
                                             item-value="id"
                                             flat
+                                            clearable
+                                            @click:clear="
+                                                $nextTick(
+                                                    () =>
+                                                        (form.inputs.asset_class_id = null)
+                                                )
+                                            "
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6"> </v-col>
@@ -239,7 +247,7 @@
                                     getConditionalFormat(aggregated.growth)
                                 "
                             >
-                                {{ Number(aggregated.growth) | toCurrency }}
+                                {{ Number(aggregated.growth) | toDecimal }}%
                             </span>
                         </td>
                         <td>-</td>
@@ -309,14 +317,6 @@
                                 >
                                     {{ item.description }}
                                 </v-chip>
-                                <v-chip
-                                    v-if="!!item.asset_class"
-                                    class="ma-2"
-                                    small
-                                    outlined
-                                >
-                                    {{ item.asset_class }}
-                                </v-chip>
                             </div>
                             <v-simple-table class="expanded-row">
                                 <template v-slot:default>
@@ -358,6 +358,15 @@
                     </fragment>
                 </template>
             </v-data-table>
+            <p
+                v-if="!!lastUpdate"
+                class="ma-2 text-caption font-weight-thin text--secondary text-end"
+            >
+                {{ lastUpdate }}
+                <v-btn x-small icon color="primary" @click="forceUpdateQuotes">
+                    <v-icon>mdi-cached</v-icon>
+                </v-btn>
+            </p>
         </v-col>
         <v-menu
             v-model="showMenu"

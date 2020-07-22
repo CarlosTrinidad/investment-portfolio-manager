@@ -6,6 +6,7 @@ export default {
 
     data() {
         return {
+            lastUpdate: localStorage.getItem("get-quotes-updated"),
             assetClasses: [],
             confirmDeleteDialog: false,
             showMenu: false,
@@ -33,7 +34,8 @@ export default {
                     buy_price: "",
                     name: "",
                     description: "",
-                    purchase_date: new Date().toISOString().substr(0, 10)
+                    purchase_date: new Date().toISOString().substr(0, 10),
+                    asset_class_id: null
                 },
                 rules: {
                     symbol: [v => !!v || "Symbol is required"],
@@ -156,64 +158,32 @@ export default {
         }
     },
     methods: {
-        getMarketQuotes(symbols) {
+        async getMarketQuotes(symbols) {
             if (symbols.length > 0) {
-                yfinance
-                    .get("market/get-quotes", {
-                        params: {
-                            region: "US",
-                            lang: "en",
-                            symbols: symbols
-                        }
-                    })
-                    .then(response => {
-                        let quotes = response.data?.quoteResponse?.result;
-
+                let getQuotes = localStorage.getItem("get-quotes");
+                var quotes;
+                if (getQuotes) {
+                    quotes = JSON.parse(getQuotes);
+                } else {
+                    try {
+                        let response = await yfinance.get("market/get-quotes", {
+                            params: {
+                                region: "US",
+                                lang: "en",
+                                symbols: symbols
+                            }
+                        });
+                        quotes = response?.data?.quoteResponse?.result;
                         if (undefined ?? quotes) {
-                            quotes.map((quote, index) => {
-                                this.purchases[index].market_price = Number(
-                                    quote?.regularMarketPrice
-                                        ? quote?.regularMarketPrice
-                                        : 0
-                                );
-                                this.purchases[index].market_value =
-                                    Number(this.purchases[index].total_shares) *
-                                    Number(this.purchases[index].market_price);
-                                this.purchases[index].market_value =
-                                    Number(this.purchases[index].total_shares) *
-                                    Number(this.purchases[index].market_price);
-                                this.purchases[index].gain_loss =
-                                    Number(this.purchases[index].market_value) -
-                                    Number(this.purchases[index].cost_basis);
-                                this.purchases[index].growth =
-                                    (Number(
-                                        this.purchases[index].market_value
-                                    ) /
-                                        Number(
-                                            this.purchases[index].cost_basis
-                                        ) -
-                                        1) *
-                                    100;
-                                this.purchases[index].anual_dividend = Number(
-                                    quote?.dividendsPerShare
-                                        ? quote?.dividendsPerShare
-                                        : 0
-                                );
-                                this.purchases[index].dividend_yield = Number(
-                                    quote?.dividendYield
-                                        ? quote?.dividendYield
-                                        : 0
-                                );
-                                this.purchases[index].anual_income =
-                                    Number(this.purchases[index].market_value) *
-                                    (Number(
-                                        this.purchases[index].dividend_yield
-                                    ) /
-                                        100);
-                            });
+                            localStorage.setItem(
+                                "get-quotes",
+                                JSON.stringify(quotes)
+                            );
+                            let today = new Date().toLocaleString();
+                            localStorage.setItem("get-quotes-updated", today);
+                            this.lastUpdate = today;
                         }
-                    })
-                    .catch(error => {
+                    } catch (error) {
                         this.snackbar = {
                             ...this.snackbar,
                             show: true,
@@ -221,8 +191,44 @@ export default {
                                 "Somenthing went wrong reaching Yahoo API, try again",
                             color: "error"
                         };
-                    })
-                    .finally(() => {});
+                    }
+                }
+
+                if (undefined ?? quotes) {
+                    quotes.map((quote, index) => {
+                        this.purchases[index].market_price = Number(
+                            quote?.regularMarketPrice
+                                ? quote?.regularMarketPrice
+                                : 0
+                        );
+                        this.purchases[index].market_value =
+                            Number(this.purchases[index].total_shares) *
+                            Number(this.purchases[index].market_price);
+                        this.purchases[index].market_value =
+                            Number(this.purchases[index].total_shares) *
+                            Number(this.purchases[index].market_price);
+                        this.purchases[index].gain_loss =
+                            Number(this.purchases[index].market_value) -
+                            Number(this.purchases[index].cost_basis);
+                        this.purchases[index].growth =
+                            (Number(this.purchases[index].market_value) /
+                                Number(this.purchases[index].cost_basis) -
+                                1) *
+                            100;
+                        this.purchases[index].anual_dividend = Number(
+                            quote?.dividendsPerShare
+                                ? quote?.dividendsPerShare
+                                : 0
+                        );
+                        this.purchases[index].dividend_yield = Number(
+                            quote?.dividendYield ? quote?.dividendYield : 0
+                        );
+                        this.purchases[index].anual_income =
+                            Number(this.purchases[index].market_value) *
+                            (Number(this.purchases[index].dividend_yield) /
+                                100);
+                    });
+                }
             }
         },
         queryMarket(v) {
@@ -261,7 +267,7 @@ export default {
         },
         getAssetClasses() {
             axios.get("/api/asset-classes").then(response => {
-                this.assetClasses = response.data
+                this.assetClasses = response.data;
             });
         },
         getGroupedPurchases() {
@@ -441,7 +447,8 @@ export default {
                 buy_price: this.selected.buy_price,
                 name: this.selected.name,
                 description: this.selected.description,
-                purchase_date: this.selected.purchase_date
+                purchase_date: this.selected.purchase_date,
+                asset_class_id: this.selected.asset_class_id
             };
             this.dialog = true;
         },
@@ -474,6 +481,11 @@ export default {
                 return "green--text";
             }
             return "";
+        },
+        forceUpdateQuotes() {
+            localStorage.removeItem("get-quotes");
+            localStorage.removeItem("get-quotes-updated");
+            this.getGroupedPurchases();
         }
     }
 };
