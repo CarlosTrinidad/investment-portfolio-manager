@@ -10,16 +10,18 @@
                         contain
                     ></v-img> </router-link
             ></v-toolbar-title>
+            <v-spacer></v-spacer>
 
-            <v-tabs v-model="model" right>
-                <v-tab href="#tab-1">
-                    Normal
-                </v-tab>
-                <v-tab href="#tab-22">
-                    Test
-                </v-tab>
-            </v-tabs>
-            
+            <div>
+                <v-tabs background-color="transparent">
+                    <v-tab to="/">
+                        Normal
+                    </v-tab>
+                    <v-tab to="/test">
+                        test
+                    </v-tab>
+                </v-tabs>
+            </div>
         </v-app-bar>
 
         <!-- Sizes your content based upon application components -->

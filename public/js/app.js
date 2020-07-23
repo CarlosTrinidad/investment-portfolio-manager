@@ -3079,6 +3079,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -22971,26 +22973,25 @@ var render = function() {
             1
           ),
           _vm._v(" "),
+          _c("v-spacer"),
+          _vm._v(" "),
           _c(
-            "v-tabs",
-            {
-              attrs: { right: "" },
-              model: {
-                value: _vm.model,
-                callback: function($$v) {
-                  _vm.model = $$v
-                },
-                expression: "model"
-              }
-            },
+            "div",
             [
-              _c("v-tab", { attrs: { href: "#tab-1" } }, [
-                _vm._v("\n                Normal\n            ")
-              ]),
-              _vm._v(" "),
-              _c("v-tab", { attrs: { href: "#tab-22" } }, [
-                _vm._v("\n                Test\n            ")
-              ])
+              _c(
+                "v-tabs",
+                { attrs: { "background-color": "transparent" } },
+                [
+                  _c("v-tab", { attrs: { to: "/" } }, [
+                    _vm._v("\n                    Normal\n                ")
+                  ]),
+                  _vm._v(" "),
+                  _c("v-tab", { attrs: { to: "/test" } }, [
+                    _vm._v("\n                    test\n                ")
+                  ])
+                ],
+                1
+              )
             ],
             1
           )
