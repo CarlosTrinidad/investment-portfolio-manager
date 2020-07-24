@@ -27,7 +27,13 @@ Route::put('purchases/{purchase}', 'PurchaseController@update');
 Route::delete('purchases/{purchase}', 'PurchaseController@delete');
 
 Route::get('asset-classes', 'AssetClassController@index');
-Route::get('asset-classes/{purchase}', 'AssetClassController@show');
+Route::get('asset-classes/{assetClass}', 'AssetClassController@show');
 Route::post('asset-classes', 'AssetClassController@store');
-Route::put('asset-classes/{purchase}', 'AssetClassController@update');
-Route::delete('asset-classes/{purchase}', 'AssetClassController@delete');
+Route::put('asset-classes/{assetClass}', 'AssetClassController@update');
+Route::delete('asset-classes/{assetClass}', 'AssetClassController@delete');
+
+Route::get('fixed-interest', 'FixedInterestController@index');
+Route::get('fixed-interest/{fixedInsterest}', 'FixedInterestController@show');
+Route::post('fixed-interest', 'FixedInterestController@store');
+Route::put('fixed-interest/{fixedInsterest}', 'FixedInterestController@update');
+Route::delete('fixed-interest/{fixedInsterest}', 'FixedInterestController@delete');

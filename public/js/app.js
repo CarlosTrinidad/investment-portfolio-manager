@@ -3095,6 +3095,144 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./resources/js/components/FixedInterest/AllFixedInterest.js?vue&type=script&lang=js&":
+/*!**************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./resources/js/components/FixedInterest/AllFixedInterest.js?vue&type=script&lang=js& ***!
+  \**************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      dialog: false,
+      form: {
+        edit: false,
+        valid: true,
+        inputs: {
+          name: "",
+          rate: "",
+          deadline: "",
+          amount: "",
+          start_date: new Date().toISOString().substr(0, 10),
+          expiration_date: new Date().toISOString().substr(0, 10),
+          gross_return: "",
+          asset_class_id: null
+        },
+        rules: {
+          name: [function (v) {
+            return !!v || "Name is required";
+          }],
+          rate: [function (v) {
+            return !!v || "Rate is required";
+          }, function (v) {
+            return v > 0 || "Rate should be greather than zero";
+          }],
+          deadline: [function (v) {
+            return !!v || "Deadline is required";
+          }, function (v) {
+            return v > 0 || "Deadline should be greather than zero";
+          }],
+          amount: [function (v) {
+            return !!v || "Amount is required";
+          }, function (v) {
+            return v > 0 || "Amount should be greather than zero";
+          }],
+          gross_return: [function (v) {
+            return !!v || "Gross return is required";
+          }, function (v) {
+            return v > 0 || "Gross return should be greather than zero";
+          }]
+        }
+      },
+      assetClasses: [],
+      start_date_menu: false,
+      expiration_date_menu: false,
+      snackbar: {
+        show: false,
+        color: "",
+        mode: "multi-line",
+        text: "",
+        timeout: 2500,
+        x: "right",
+        y: "top"
+      }
+    };
+  },
+  created: function created() {
+    this.getAssetClasses();
+  },
+  watch: {// TODO: add watch to start date to add deadline and calculate expiration date
+    // TODO: add watch to calculate gross_return
+  },
+  methods: {
+    getAssetClasses: function getAssetClasses() {
+      var _this = this;
+
+      axios.get("/api/asset-classes").then(function (response) {
+        _this.assetClasses = response.data;
+      });
+    },
+    close: function close() {
+      this.dialog = false;
+      this.form.edit = false;
+      this.$refs.form.resetValidation();
+      this.$refs.form.reset();
+    },
+    submit: function submit() {
+      if (this.form.edit) {// this.update();
+      } else {
+        this.create();
+      }
+    },
+    create: function create() {
+      var _this2 = this;
+
+      if (this.$refs.form.validate()) {
+        axios.post("/api/fixed-interest", this.form.inputs).then(function (response) {
+          if (response.status === 201) {
+            _this2.snackbar = _objectSpread(_objectSpread({}, _this2.snackbar), {}, {
+              show: true,
+              text: "Investment saved correctly",
+              color: "success"
+            });
+            _this2.dialog = false; // this.selected = {};
+            // this.expanded = [];
+
+            _this2.$refs.form.resetValidation();
+
+            _this2.$refs.form.reset(); // TODO: Change to get list of all investments
+            // this.getGroupedPurchases();
+
+          } else {
+            _this2.snackbar = _objectSpread(_objectSpread({}, _this2.snackbar), {}, {
+              show: true,
+              text: "Investment could not be saved, try again",
+              color: "error"
+            });
+          }
+        })["catch"](function (error) {
+          _this2.snackbar = _objectSpread(_objectSpread({}, _this2.snackbar), {}, {
+            show: true,
+            text: "Investment could not be saved, try again",
+            color: "error"
+          });
+        });
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./resources/js/components/Purchases/AllPurchases.js?vue&type=script&lang=js&":
 /*!******************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./resources/js/components/Purchases/AllPurchases.js?vue&type=script&lang=js& ***!
@@ -3174,7 +3312,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           buy_price: [function (v) {
             return !!v || "Buy price is required";
           }, function (v) {
-            return v > 0 || "Buy prince should be greather than zero";
+            return v > 0 || "Buy price should be greather than zero";
           }]
         }
       },
@@ -22983,11 +23121,13 @@ var render = function() {
                 { attrs: { "background-color": "transparent" } },
                 [
                   _c("v-tab", { attrs: { to: "/" } }, [
-                    _vm._v("\n                    Normal\n                ")
+                    _vm._v("\n                    Shares\n                ")
                   ]),
                   _vm._v(" "),
-                  _c("v-tab", { attrs: { to: "/test" } }, [
-                    _vm._v("\n                    test\n                ")
+                  _c("v-tab", { attrs: { to: "/fixed-interest" } }, [
+                    _vm._v(
+                      "\n                    Fixed interest\n                "
+                    )
                   ])
                 ],
                 1
@@ -23016,6 +23156,627 @@ var render = function() {
                 "\n        "
             )
           ])
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/FixedInterest/AllFixedInterest.vue?vue&type=template&id=094c07ce&":
+/*!*********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/FixedInterest/AllFixedInterest.vue?vue&type=template&id=094c07ce& ***!
+  \*********************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "v-row",
+    { attrs: { align: "start", justify: "center" } },
+    [
+      _c(
+        "v-col",
+        { attrs: { cols: "11" } },
+        [
+          _c(
+            "v-row",
+            { attrs: { justify: "space-between" } },
+            [
+              _c(
+                "div",
+                {
+                  staticClass:
+                    "transition-swing text-h5 primary--text font-weight-medium"
+                },
+                [
+                  _vm._v(
+                    "\n                Fixed interest investments\n            "
+                  )
+                ]
+              ),
+              _vm._v(" "),
+              _c(
+                "v-btn",
+                {
+                  staticClass: "text-capitalize",
+                  attrs: { outlined: "", color: "primary" },
+                  on: {
+                    click: function($event) {
+                      $event.stopPropagation()
+                      _vm.dialog = true
+                    }
+                  }
+                },
+                [_vm._v("Add investment")]
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c("br"),
+          _vm._v(" "),
+          _c(
+            "v-dialog",
+            {
+              attrs: { persistent: "", "max-width": "800px" },
+              model: {
+                value: _vm.dialog,
+                callback: function($$v) {
+                  _vm.dialog = $$v
+                },
+                expression: "dialog"
+              }
+            },
+            [
+              _c(
+                "v-card",
+                [
+                  _c("v-card-title", [
+                    _c("span", { staticClass: "headline" }, [
+                      _vm._v("Investment")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-text",
+                    [
+                      _c(
+                        "v-form",
+                        {
+                          ref: "form",
+                          attrs: {
+                            "lazy-validation": true,
+                            id: "purchase-form"
+                          },
+                          on: {
+                            submit: function($event) {
+                              $event.preventDefault()
+                            }
+                          },
+                          nativeOn: {
+                            keyup: function($event) {
+                              if (
+                                !$event.type.indexOf("key") &&
+                                _vm._k(
+                                  $event.keyCode,
+                                  "enter",
+                                  13,
+                                  $event.key,
+                                  "Enter"
+                                )
+                              ) {
+                                return null
+                              }
+                              return _vm.submit($event)
+                            }
+                          },
+                          model: {
+                            value: _vm.form.valid,
+                            callback: function($$v) {
+                              _vm.$set(_vm.form, "valid", $$v)
+                            },
+                            expression: "form.valid"
+                          }
+                        },
+                        [
+                          _c(
+                            "v-container",
+                            [
+                              _c(
+                                "v-row",
+                                [
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "12" } },
+                                    [
+                                      _c("v-text-field", {
+                                        attrs: {
+                                          required: "",
+                                          rules: _vm.form.rules.name,
+                                          label: "Name*"
+                                        },
+                                        model: {
+                                          value: _vm.form.inputs.name,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.form.inputs,
+                                              "name",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "form.inputs.name"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "4" } },
+                                    [
+                                      _c("v-text-field", {
+                                        attrs: {
+                                          required: "",
+                                          rules: _vm.form.rules.deadline,
+                                          hint: "number of days",
+                                          label: "Deadline*",
+                                          type: "number"
+                                        },
+                                        model: {
+                                          value: _vm.form.inputs.deadline,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.form.inputs,
+                                              "deadline",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "form.inputs.deadline"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "4" } },
+                                    [
+                                      _c("v-text-field", {
+                                        attrs: {
+                                          required: "",
+                                          rules: _vm.form.rules.rate,
+                                          label: "Rate*",
+                                          type: "number",
+                                          hint: "investment rate percentage"
+                                        },
+                                        model: {
+                                          value: _vm.form.inputs.rate,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.form.inputs,
+                                              "rate",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "form.inputs.rate"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "4" } },
+                                    [
+                                      _c("v-text-field", {
+                                        attrs: {
+                                          required: "",
+                                          rules: _vm.form.rules.amount,
+                                          label: "Amount*",
+                                          type: "number"
+                                        },
+                                        model: {
+                                          value: _vm.form.inputs.amount,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.form.inputs,
+                                              "amount",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "form.inputs.amount"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "6" } },
+                                    [
+                                      _c(
+                                        "v-menu",
+                                        {
+                                          attrs: {
+                                            "close-on-content-click": false,
+                                            "nudge-right": 40,
+                                            transition: "scale-transition",
+                                            "offset-y": "",
+                                            "min-width": "290px"
+                                          },
+                                          scopedSlots: _vm._u([
+                                            {
+                                              key: "activator",
+                                              fn: function(ref) {
+                                                var on = ref.on
+                                                var attrs = ref.attrs
+                                                return [
+                                                  _c(
+                                                    "v-text-field",
+                                                    _vm._g(
+                                                      _vm._b(
+                                                        {
+                                                          attrs: {
+                                                            label: "Start date",
+                                                            "prepend-icon":
+                                                              "mdi-calendar",
+                                                            readonly: ""
+                                                          },
+                                                          model: {
+                                                            value:
+                                                              _vm.form.inputs
+                                                                .start_date,
+                                                            callback: function(
+                                                              $$v
+                                                            ) {
+                                                              _vm.$set(
+                                                                _vm.form.inputs,
+                                                                "start_date",
+                                                                $$v
+                                                              )
+                                                            },
+                                                            expression:
+                                                              "\n                                                    form.inputs.start_date\n                                                "
+                                                          }
+                                                        },
+                                                        "v-text-field",
+                                                        attrs,
+                                                        false
+                                                      ),
+                                                      on
+                                                    )
+                                                  )
+                                                ]
+                                              }
+                                            }
+                                          ]),
+                                          model: {
+                                            value: _vm.start_date_menu,
+                                            callback: function($$v) {
+                                              _vm.start_date_menu = $$v
+                                            },
+                                            expression: "start_date_menu"
+                                          }
+                                        },
+                                        [
+                                          _vm._v(" "),
+                                          _c("v-date-picker", {
+                                            on: {
+                                              input: function($event) {
+                                                _vm.start_date_menu = false
+                                              }
+                                            },
+                                            model: {
+                                              value: _vm.form.inputs.start_date,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.form.inputs,
+                                                  "start_date",
+                                                  $$v
+                                                )
+                                              },
+                                              expression:
+                                                "form.inputs.start_date"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "6" } },
+                                    [
+                                      _c(
+                                        "v-menu",
+                                        {
+                                          attrs: {
+                                            "close-on-content-click": false,
+                                            "nudge-right": 40,
+                                            transition: "scale-transition",
+                                            "offset-y": "",
+                                            "min-width": "290px"
+                                          },
+                                          scopedSlots: _vm._u([
+                                            {
+                                              key: "activator",
+                                              fn: function(ref) {
+                                                var on = ref.on
+                                                var attrs = ref.attrs
+                                                return [
+                                                  _c(
+                                                    "v-text-field",
+                                                    _vm._g(
+                                                      _vm._b(
+                                                        {
+                                                          attrs: {
+                                                            label:
+                                                              "Expiration date",
+                                                            "prepend-icon":
+                                                              "mdi-calendar",
+                                                            readonly: ""
+                                                          },
+                                                          model: {
+                                                            value:
+                                                              _vm.form.inputs
+                                                                .expiration_date,
+                                                            callback: function(
+                                                              $$v
+                                                            ) {
+                                                              _vm.$set(
+                                                                _vm.form.inputs,
+                                                                "expiration_date",
+                                                                $$v
+                                                              )
+                                                            },
+                                                            expression:
+                                                              "\n                                                    form.inputs\n                                                        .expiration_date\n                                                "
+                                                          }
+                                                        },
+                                                        "v-text-field",
+                                                        attrs,
+                                                        false
+                                                      ),
+                                                      on
+                                                    )
+                                                  )
+                                                ]
+                                              }
+                                            }
+                                          ]),
+                                          model: {
+                                            value: _vm.expiration_date_menu,
+                                            callback: function($$v) {
+                                              _vm.expiration_date_menu = $$v
+                                            },
+                                            expression: "expiration_date_menu"
+                                          }
+                                        },
+                                        [
+                                          _vm._v(" "),
+                                          _c("v-date-picker", {
+                                            on: {
+                                              input: function($event) {
+                                                _vm.expiration_date_menu = false
+                                              }
+                                            },
+                                            model: {
+                                              value:
+                                                _vm.form.inputs.expiration_date,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  _vm.form.inputs,
+                                                  "expiration_date",
+                                                  $$v
+                                                )
+                                              },
+                                              expression:
+                                                "\n                                                form.inputs.expiration_date\n                                            "
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "4" } },
+                                    [
+                                      _c("v-text-field", {
+                                        attrs: {
+                                          required: "",
+                                          rules: _vm.form.rules.gross_return,
+                                          label: "Gross return*",
+                                          type: "number"
+                                        },
+                                        model: {
+                                          value: _vm.form.inputs.gross_return,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.form.inputs,
+                                              "gross_return",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "form.inputs.gross_return"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("v-col", {
+                                    attrs: { cols: "12", sm: "8" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12", sm: "6" } },
+                                    [
+                                      _c("v-select", {
+                                        attrs: {
+                                          items: _vm.assetClasses,
+                                          label: "Asset class",
+                                          "item-text": "name",
+                                          "item-value": "id",
+                                          flat: "",
+                                          clearable: ""
+                                        },
+                                        on: {
+                                          "click:clear": function($event) {
+                                            _vm.$nextTick(function() {
+                                              return (_vm.form.inputs.asset_class_id = null)
+                                            })
+                                          }
+                                        },
+                                        model: {
+                                          value: _vm.form.inputs.asset_class_id,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              _vm.form.inputs,
+                                              "asset_class_id",
+                                              $$v
+                                            )
+                                          },
+                                          expression:
+                                            "form.inputs.asset_class_id"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c("small", [_vm._v("*indicates required field")])
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-actions",
+                    [
+                      _c("v-spacer"),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", depressed: "" },
+                          on: { click: _vm.close }
+                        },
+                        [_vm._v("Close")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { color: "primary", text: "" },
+                          on: { click: _vm.submit }
+                        },
+                        [_vm._v("Save")]
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "v-snackbar",
+            {
+              attrs: {
+                bottom: _vm.snackbar.y === "bottom",
+                color: _vm.snackbar.color,
+                left: _vm.snackbar.x === "left",
+                "multi-line": _vm.snackbar.mode === "multi-line",
+                right: _vm.snackbar.x === "right",
+                timeout: _vm.snackbar.timeout,
+                top: _vm.snackbar.y === "top",
+                vertical: _vm.snackbar.mode === "vertical"
+              },
+              scopedSlots: _vm._u([
+                {
+                  key: "action",
+                  fn: function(ref) {
+                    var attrs = ref.attrs
+                    return [
+                      _c(
+                        "v-btn",
+                        _vm._b(
+                          {
+                            attrs: { dark: "", text: "" },
+                            on: {
+                              click: function($event) {
+                                _vm.snackbar.show = false
+                              }
+                            }
+                          },
+                          "v-btn",
+                          attrs,
+                          false
+                        ),
+                        [
+                          _vm._v(
+                            "\n                    Close\n                "
+                          )
+                        ]
+                      )
+                    ]
+                  }
+                }
+              ]),
+              model: {
+                value: _vm.snackbar.show,
+                callback: function($$v) {
+                  _vm.$set(_vm.snackbar, "show", $$v)
+                },
+                expression: "snackbar.show"
+              }
+            },
+            [
+              _vm._v(
+                "\n            " +
+                  _vm._s(_vm.snackbar.text) +
+                  "\n\n            "
+              )
+            ]
+          )
         ],
         1
       )
@@ -83381,6 +84142,76 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /***/ }),
 
+/***/ "./resources/js/components/FixedInterest/AllFixedInterest.js?vue&type=script&lang=js&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/FixedInterest/AllFixedInterest.js?vue&type=script&lang=js& ***!
+  \********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_AllFixedInterest_js_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!./AllFixedInterest.js?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./resources/js/components/FixedInterest/AllFixedInterest.js?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_AllFixedInterest_js_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/FixedInterest/AllFixedInterest.vue":
+/*!********************************************************************!*\
+  !*** ./resources/js/components/FixedInterest/AllFixedInterest.vue ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _AllFixedInterest_vue_vue_type_template_id_094c07ce___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./AllFixedInterest.vue?vue&type=template&id=094c07ce& */ "./resources/js/components/FixedInterest/AllFixedInterest.vue?vue&type=template&id=094c07ce&");
+/* harmony import */ var _AllFixedInterest_js_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AllFixedInterest.js?vue&type=script&lang=js& */ "./resources/js/components/FixedInterest/AllFixedInterest.js?vue&type=script&lang=js&");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _AllFixedInterest_js_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _AllFixedInterest_js_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _AllFixedInterest_js_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _AllFixedInterest_vue_vue_type_template_id_094c07ce___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _AllFixedInterest_vue_vue_type_template_id_094c07ce___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/FixedInterest/AllFixedInterest.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/FixedInterest/AllFixedInterest.vue?vue&type=template&id=094c07ce&":
+/*!***************************************************************************************************!*\
+  !*** ./resources/js/components/FixedInterest/AllFixedInterest.vue?vue&type=template&id=094c07ce& ***!
+  \***************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_AllFixedInterest_vue_vue_type_template_id_094c07ce___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./AllFixedInterest.vue?vue&type=template&id=094c07ce& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/FixedInterest/AllFixedInterest.vue?vue&type=template&id=094c07ce&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_AllFixedInterest_vue_vue_type_template_id_094c07ce___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_AllFixedInterest_vue_vue_type_template_id_094c07ce___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/Purchases/AllPurchases.css?vue&type=style&index=0&id=70968f99&scoped=true&lang=css&":
 /*!*********************************************************************************************************************!*\
   !*** ./resources/js/components/Purchases/AllPurchases.css?vue&type=style&index=0&id=70968f99&scoped=true&lang=css& ***!
@@ -83489,12 +84320,18 @@ module.exports = "/images/logo.png?ebb7d5a37434b2c79772adb40bba1c15";
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "routes", function() { return routes; });
-/* harmony import */ var _components_Purchases_AllPurchases_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/Purchases/AllPurchases.vue */ "./resources/js/components/Purchases/AllPurchases.vue");
+/* harmony import */ var _components_FixedInterest_AllFixedInterest_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/FixedInterest/AllFixedInterest.vue */ "./resources/js/components/FixedInterest/AllFixedInterest.vue");
+/* harmony import */ var _components_Purchases_AllPurchases_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/Purchases/AllPurchases.vue */ "./resources/js/components/Purchases/AllPurchases.vue");
+
 
 var routes = [{
   name: "home",
   path: "/",
-  component: _components_Purchases_AllPurchases_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  component: _components_Purchases_AllPurchases_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+}, {
+  name: "fixed-interest",
+  path: "/fixed-interest",
+  component: _components_FixedInterest_AllFixedInterest_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
 }];
 
 /***/ }),

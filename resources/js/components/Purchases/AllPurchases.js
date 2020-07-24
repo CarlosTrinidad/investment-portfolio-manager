@@ -46,7 +46,7 @@ export default {
                     ],
                     buy_price: [
                         v => !!v || "Buy price is required",
-                        v => v > 0 || "Buy prince should be greather than zero"
+                        v => v > 0 || "Buy price should be greather than zero"
                     ]
                 }
             },

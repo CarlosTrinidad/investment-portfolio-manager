@@ -15,10 +15,10 @@
             <div>
                 <v-tabs background-color="transparent">
                     <v-tab to="/">
-                        Normal
+                        Shares
                     </v-tab>
-                    <v-tab to="/test">
-                        test
+                    <v-tab to="/fixed-interest">
+                        Fixed interest
                     </v-tab>
                 </v-tabs>
             </div>

@@ -18,4 +18,8 @@ class AssetClass extends Model
     public function purchases(){
         return $this->hasMany("App\Models\Purchases");
     }
+
+    public function fixedInterests(){
+        return $this->hasMany("App\Models\Purchases");
+    }
 }
