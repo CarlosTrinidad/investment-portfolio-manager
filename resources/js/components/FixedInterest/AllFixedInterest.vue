@@ -5,7 +5,7 @@
                 <div
                     class="transition-swing text-h5 primary--text font-weight-medium"
                 >
-                    Fixed interest investments
+                    Fixed interest
                 </div>
                 <v-btn
                     class="text-capitalize"
@@ -59,6 +59,7 @@
                                             label="Rate*"
                                             type="number"
                                             hint="investment rate percentage"
+                                            suffix="%"
                                         ></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="4">
@@ -68,6 +69,7 @@
                                             :rules="form.rules.amount"
                                             label="Amount*"
                                             type="number"
+                                            prefix="$"
                                         ></v-text-field>
                                     </v-col>
 
@@ -142,6 +144,7 @@
                                             :rules="form.rules.gross_return"
                                             label="Gross return*"
                                             type="number"
+                                            prefix="$"
                                         ></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="8"> </v-col>
@@ -201,168 +204,44 @@
                 </template>
             </v-snackbar>
 
-            <!-- <v-data-table
+            <v-data-table
                 :headers="headers"
-                :items="purchases"
+                :items="investments"
                 multi-sort
                 :disable-pagination="true"
                 :hide-default-footer="true"
                 :fixed-header="true"
                 :calculate-widths="false"
                 :loading="loading"
-                show-expand
-                :expanded.sync="expanded"
-                @item-expanded="getDetail"
                 item-key="id"
+                @contextmenu:row="contextMenu"
             >
-                <template v-slot:body.append>
-                    <tr>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>
-                            {{ Number(aggregated.total_shares) | toDecimal }}
-                        </td>
-                        <td>-</td>
-                        <td>-</td>
-
-                        <td>
-                            {{ Number(aggregated.cost_basis) | toCurrency }}
-                        </td>
-                        <td>
-                            {{ Number(aggregated.market_value) | toCurrency }}
-                        </td>
-                        <td>
-                            <span
-                                v-bind:class="
-                                    getConditionalFormat(aggregated.gain_loss)
-                                "
-                            >
-                                {{ Number(aggregated.gain_loss) | toCurrency }}
-                            </span>
-                        </td>
-                        <td>
-                            <span
-                                v-bind:class="
-                                    getConditionalFormat(aggregated.growth)
-                                "
-                            >
-                                {{ Number(aggregated.growth) | toDecimal }}%
-                            </span>
-                        </td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>
-                            {{ Number(aggregated.anual_income) | toCurrency }}
-                        </td>
-                    </tr>
+                <template v-slot:item.rate="{ item }">
+                    {{ Number(item.rate) | toDecimal }}%
                 </template>
-                <template v-slot:item.total_shares="{ item }">
-                    {{ Number(item.total_shares) | toDecimal }}
+                <template v-slot:item.deadline="{ item }">
+                    {{ Number(item.deadline) | toDecimal }}
                 </template>
-                <template v-slot:item.average_buy_price="{ item }">
-                    {{ Number(item.average_buy_price) | toCurrency }}
+                <template v-slot:item.amount="{ item }">
+                    {{ Number(item.amount) | toCurrency }}
                 </template>
-                <template v-slot:item.market_price="{ item }">
-                    {{ Number(item.market_price) | toCurrency }}
+                <template v-slot:item.gross_return="{ item }">
+                    {{ Number(item.gross_return) | toCurrency }}
                 </template>
-                <template v-slot:item.cost_basis="{ item }">
-                    {{ Number(item.cost_basis) | toCurrency }}
-                </template>
-                <template v-slot:item.market_value="{ item }">
-                    {{ Number(item.market_value) | toCurrency }}
-                </template>
-                <template v-slot:item.gain_loss="{ item }">
-                    <span v-bind:class="getConditionalFormat(item.gain_loss)">{{
-                        Number(item.gain_loss) | toCurrency
-                    }}</span>
-                </template>
-                <template v-slot:item.growth="{ item }">
-                    <span v-bind:class="getConditionalFormat(item.growth)"
-                        >{{ Number(item.growth) | toDecimal }}%</span
+                <template v-slot:item.expiration_date="{ item }">
+                    <span
+                        v-bind:class="
+                            getConditionalFormat(item.expiration_date)
+                        "
+                        >{{ item.expiration_date }}</span
                     >
                 </template>
-                <template v-slot:item.anual_dividend="{ item }">
-                    {{ Number(item.anual_dividend) | toCurrency }}
-                </template>
-                <template v-slot:item.dividend_yield="{ item }">
-                    {{ Number(item.dividend_yield) | toDecimal }}%
-                </template>
-                <template v-slot:item.anual_income="{ item }">
-                    {{ Number(item.anual_income) | toCurrency }}
-                </template>
-                <template v-slot:expanded-item="{ headers, item }">
-                    <fragment v-if="item.detail.length === 0">
-                        <td :colspan="headers.length">
-                            <div>
-                                Loading...
-                                <v-progress-circular
-                                    indeterminate
-                                    :width="3"
-                                    color="primary"
-                                ></v-progress-circular>
-                            </div>
-                        </td>
-                    </fragment>
-
-                    <fragment v-else>
-                        <td :colspan="headers.length" class="no-padding">
-                            <div class="transition-swing text-h6 pa-4 ml-5">
-                                {{ item.name }}
-                                <v-chip
-                                    v-if="item.description.length > 0"
-                                    class="ma-2"
-                                    small
-                                    outlined
-                                >
-                                    {{ item.description }}
-                                </v-chip>
-                            </div>
-                            <v-simple-table class="expanded-row">
-                                <template v-slot:default>
-                                    <tbody>
-                                        <tr
-                                            v-for="(line, index) in item.detail"
-                                            :key="index"
-                                            @contextmenu="
-                                                contextMenu($event, line)
-                                            "
-                                        >
-                                            <td width="56px"></td>
-                                            <td width="225px">
-                                                {{ line.name }}
-                                            </td>
-                                            <td width="120px">
-                                                {{ line.symbol }}
-                                            </td>
-                                            <td width="110px">
-                                                {{
-                                                    Number(line.shares)
-                                                        | toDecimal
-                                                }}
-                                            </td>
-                                            <td width="155px">
-                                                {{
-                                                    Number(line.buy_price)
-                                                        | toCurrency
-                                                }}
-                                            </td>
-                                            <td
-                                                :colspan="headers.length - 5"
-                                            ></td>
-                                        </tr>
-                                    </tbody>
-                                </template>
-                            </v-simple-table>
-                        </td>
-                    </fragment>
-                </template>
-            </v-data-table> -->
+            </v-data-table>
         </v-col>
-        <!-- <v-menu
-            v-model="showMenu"
-            :position-x="x"
-            :position-y="y"
+        <v-menu
+            v-model="menu.show"
+            :position-x="menu.x"
+            :position-y="menu.y"
             absolute
             offset-y
         >
@@ -376,14 +255,14 @@
                     >
                 </v-list-item>
             </v-list>
-        </v-menu> -->
-        <!-- <v-dialog v-model="confirmDeleteDialog" max-width="290">
+        </v-menu>
+        <v-dialog v-model="confirmDeleteDialog" max-width="290">
             <v-card>
-                <v-card-title class="headline">Delete purchase?</v-card-title>
+                <v-card-title class="headline">Delete investment?</v-card-title>
 
                 <v-card-text>
-                    This action will permanently remove this purchase from your
-                    portfolio. Do you want to continue?
+                    This action will permanently remove this investment from
+                    your portfolio. Do you want to continue?
                 </v-card-text>
 
                 <v-card-actions>
@@ -393,12 +272,12 @@
                         Cancel
                     </v-btn>
 
-                    <v-btn color="pink darken-1" text @click="deletePurchase">
+                    <v-btn color="pink darken-1" text @click="deleteInvestment">
                         Delete
                     </v-btn>
                 </v-card-actions>
             </v-card>
-        </v-dialog> -->
+        </v-dialog>
     </v-row>
 </template>
 

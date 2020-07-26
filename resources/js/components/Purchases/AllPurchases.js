@@ -1,9 +1,9 @@
 import { Fragment } from "vue-fragment";
+import moment from "moment";
 import yfinance from "../../api/yfinance";
 
 export default {
     components: { Fragment },
-
     data() {
         return {
             lastUpdate: localStorage.getItem("get-quotes-updated"),
@@ -34,7 +34,7 @@ export default {
                     buy_price: "",
                     name: "",
                     description: "",
-                    purchase_date: new Date().toISOString().substr(0, 10),
+                    purchase_date: moment().format("YYYY-MM-DD"),
                     asset_class_id: null
                 },
                 rules: {
@@ -179,7 +179,7 @@ export default {
                                 "get-quotes",
                                 JSON.stringify(quotes)
                             );
-                            let today = new Date().toLocaleString();
+                            let today = moment().format("LLLL");
                             localStorage.setItem("get-quotes-updated", today);
                             this.lastUpdate = today;
                         }

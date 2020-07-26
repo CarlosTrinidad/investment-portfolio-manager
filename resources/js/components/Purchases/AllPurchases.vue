@@ -108,7 +108,7 @@
                                             label="Buy price*"
                                             type="number"
                                             hint="average price"
-                                            prepend-inner-icon="mdi-currency-usd"
+                                            prefix="$"
                                             required
                                         ></v-text-field>
                                     </v-col>

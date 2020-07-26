@@ -15,10 +15,13 @@
             <div>
                 <v-tabs background-color="transparent">
                     <v-tab to="/">
-                        Shares
+                        Dashboard
+                    </v-tab>
+                    <v-tab to="/variable-interest">
+                        Variable
                     </v-tab>
                     <v-tab to="/fixed-interest">
-                        Fixed interest
+                        Fixed
                     </v-tab>
                 </v-tabs>
             </div>
