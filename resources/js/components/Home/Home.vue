@@ -77,15 +77,17 @@
                     </v-list-item>
                     <v-row>
                         <v-col cols="12" md="8">
+                        <v-col cols="4" v-for="(asset, name) in raw.assetClasses" v-bind:key="asset">
                             <div class="mx-5">
                                 <v-text-field
-                                    v-model="form.field"
-                                    label="Emerging Market Equities*"
+                                    v-model="form[name]"
+                                    :label="asset"
                                     type="number"
                                     prefix="$"
                                     required
                                 ></v-text-field>
                             </div>
+                        </v-col>
                         </v-col>
                         <v-col cols="12" md="4">
                             <div class="mx-5" v-if="!custom.loading">

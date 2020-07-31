@@ -5,9 +5,12 @@ export default {
     components: { VueApexCharts },
     data() {
         return {
-            purchases: [],
-            quotes: {},
-            fixed: [],
+            raw: {
+                purchases: [],
+                quotes: {},
+                fixed: [],
+                assetClasses: []
+            },
             generalData: {
                 fixed: 0,
                 variable: 0
@@ -15,9 +18,7 @@ export default {
             classesData: {},
             detailData: {},
             customData: {},
-            form: {
-                field: 0
-            },
+            form: {},
             general: {
                 loading: true,
                 series: [0, 0],
@@ -213,20 +214,147 @@ export default {
             }
         };
     },
-    created() {
-        this.getPurchases();
-        this.getFixedInterestInvestments();
+    beforeMount: async function() {
+        await this.getRawData();
     },
+    created() {},
     methods: {
-        getPurchases() {
-            axios.get("/api/purchases").then(response => {
-                this.purchases = response.data;
-            });
-        },
-        getFixedInterestInvestments() {
-            axios.get("/api/fixed-interest").then(response => {
-                this.fixed = response.data;
-            });
+        async getRawData() {
+            try {
+                let assetClassesResponse = await axios.get(
+                    "/api/asset-classes"
+                );
+                let purchasesResponse = await axios.get("/api/purchases");
+                let fixedResponse = await axios.get("/api/fixed-interest");
+
+                // Map classes to object
+                let mappedClasses = {
+                    0: { name: "Other", id: 0 }
+                };
+                assetClassesResponse.data.map(el => {
+                    mappedClasses[el.id] = {
+                        name: el.name,
+                        id: el.id
+                    };
+                });
+                this.raw.assetClasses = mappedClasses;
+                this.raw.purchases = purchasesResponse.data;
+                this.raw.fixed = fixedResponse.data;
+
+                let symbols = purchasesResponse.data.map(
+                    element => element.symbol
+                );
+                let uniqueSymbols = [...new Set(symbols)];
+                let quotes = await this.getMarketQuotes(uniqueSymbols.sort());
+
+                this.raw.quotes = quotes;
+
+                let totalFixed = 0;
+                let totalVariable = 0;
+                let byIndex = {};
+                let byClasses = {};
+
+                this.raw.purchases.forEach(element => {
+                    let marketPrice =
+                        Number(element.shares) * Number(quotes[element.symbol]);
+
+                    totalVariable += marketPrice;
+
+                    if (!byIndex.hasOwnProperty(element.symbol)) {
+                        byIndex[element.symbol] = 0;
+                    }
+
+                    byIndex[element.symbol] += marketPrice;
+
+                    if (element.asset_class !== null) {
+                        if (!byClasses.hasOwnProperty(element.asset_class_id)) {
+                            byClasses[element.asset_class_id] = 0;
+                        }
+
+                        byClasses[element.asset_class_id] += marketPrice;
+                    } else {
+                        if (!byClasses.hasOwnProperty("0")) {
+                            byClasses["0"] = 0;
+                        }
+                        byClasses["0"] += marketPrice;
+                    }
+                });
+
+                this.raw.fixed.forEach(element => {
+                    let amount = Number(element.amount);
+                    if (!byIndex.hasOwnProperty(element.name)) {
+                        byIndex[element.name] = 0;
+                    }
+                    byIndex[element.name] += amount;
+                    totalFixed += amount;
+
+                    if (element.asset_class !== null) {
+                        if (!byClasses.hasOwnProperty(element.asset_class_id)) {
+                            byClasses[element.asset_class_id] = 0;
+                        }
+
+                        byClasses[element.asset_class_id] += amount;
+                    } else {
+                        if (!byClasses.hasOwnProperty("0")) {
+                            byClasses["0"] = 0;
+                        }
+                        byClasses["0"] += amount;
+                    }
+                });
+
+                // transform to fixed 2
+
+                totalFixed = totalFixed.toFixed(2);
+                totalVariable = totalVariable.toFixed(2);
+                let indexKeys = Object.keys(byIndex);
+                indexKeys.sort(function(a, b) {
+                    return (
+                        Number(byIndex[b].toFixed(2)) -
+                        Number(byIndex[a].toFixed(2))
+                    );
+                });
+
+                let sortedByIndex = {};
+
+                indexKeys.forEach(key => {
+                    if (byIndex.hasOwnProperty(key)) {
+                        const element = Number(byIndex[key].toFixed(2));
+                        sortedByIndex[key] = element;
+                    }
+                });
+
+                let classesKeys = Object.keys(byClasses);
+                classesKeys.sort(function(a, b) {
+                    return (
+                        Number(byClasses[b].toFixed(2)) -
+                        Number(byClasses[a].toFixed(2))
+                    );
+                });
+
+                let sortedByClasses = {};
+
+                classesKeys.forEach((key, index) => {
+                    if (byClasses.hasOwnProperty(key)) {
+                        const element = Number(byClasses[key].toFixed(2));
+                        sortedByClasses[index] = {
+                            asset_class_id: key,
+                            value: element
+                        };
+                    }
+                });
+
+                this.generalData = {
+                    fixed: totalFixed,
+                    variable: totalVariable
+                };
+                this.classesData = sortedByClasses;
+                this.detailData = sortedByIndex;
+
+                this.customData = { ...sortedByClasses };
+                // this.form = { ...sortedByClasses };
+            } catch (error) {
+                alert("Something went wrong :( maybe a refresh would help (?)");
+            }
         },
         async getMarketQuotes(symbols) {
             if (symbols.length > 0) {
@@ -264,8 +392,8 @@ export default {
                     }
                 }
 
+                let newQuotes = {};
                 if (undefined ?? quotes) {
-                    let newQuotes = {};
                     quotes.map(quote => {
                         let symbol = quote?.symbol;
                         newQuotes[symbol] = Number(
@@ -274,98 +402,12 @@ export default {
                                 : 0
                         );
                     });
-                    this.quotes = newQuotes;
                 }
+                return newQuotes;
             }
         }
     },
     watch: {
-        fixed: {
-            handler(value) {
-                this.generalData["fixed"] = value
-                    .reduce(
-                        (acumulator, current) =>
-                            acumulator + Number(current.amount),
-                        0
-                    )
-                    .toFixed(2);
-            }
-        },
-        purchases: {
-            handler(value) {
-                let symbols = value.map(element => element.symbol);
-                let uniqueSymbols = [...new Set(symbols)];
-                this.getMarketQuotes(uniqueSymbols.sort());
-            }
-        },
-        quotes: {
-            handler(value) {
-                this.generalData["variable"] = this.purchases
-                    .reduce(
-                        (acumulator, current) =>
-                            acumulator +
-                            Number(current.shares) *
-                                Number(value[current.symbol]),
-                        0
-                    )
-                    .toFixed(2);
-                let newClassesData = {};
-                let newDetailData = {};
-                this.purchases.forEach(element => {
-                    let marketPrice =
-                        Number(element.shares) * Number(value[element.symbol]);
-
-                    if (!newDetailData.hasOwnProperty(element.symbol)) {
-                        newDetailData[element.symbol] = 0;
-                    }
-                    newDetailData[element.symbol] += marketPrice;
-
-                    if (element.asset_class !== null) {
-                        if (
-                            !newClassesData.hasOwnProperty(
-                                element.asset_class.name
-                            )
-                        ) {
-                            newClassesData[element.asset_class.name] = 0;
-                        }
-
-                        newClassesData[element.asset_class.name] += marketPrice;
-                    } else {
-                        if (!newClassesData.hasOwnProperty("Other")) {
-                            newClassesData["Other"] = 0;
-                        }
-                        newClassesData["Other"] += marketPrice;
-                    }
-                });
-                this.fixed.forEach(element => {
-                    let amount = Number(element.amount);
-                    if (!newDetailData.hasOwnProperty(element.name)) {
-                        newDetailData[element.name] = 0;
-                    }
-                    newDetailData[element.name] += amount;
-
-                    if (element.asset_class !== null) {
-                        if (
-                            !newClassesData.hasOwnProperty(
-                                element.asset_class.name
-                            )
-                        ) {
-                            newClassesData[element.asset_class.name] = 0;
-                        }
-
-                        newClassesData[element.asset_class.name] += amount;
-                    } else {
-                        if (!newClassesData.hasOwnProperty("Other")) {
-                            newClassesData["Other"] = 0;
-                        }
-                        newClassesData["Other"] += amount;
-                    }
-                });
-                this.classesData = newClassesData;
-                this.customData = newClassesData;
-                this.detailData = newDetailData;
-            }
-        },
         generalData: {
             deep: true,
             handler(value) {
@@ -379,8 +421,21 @@ export default {
         classesData: {
             deep: true,
             handler(value) {
-                this.classes.series = Object.values(value);
-                this.classes.options.labels = Object.keys(value);
+                let values = [];
+                let labels = [];
+
+                for (const key in value) {
+                    if (value.hasOwnProperty(key)) {
+                        const element = value[key];
+                        values.push(element.value);
+                        labels.push(
+                            this.raw.assetClasses[element.asset_class_id].name
+                        );
+                    }
+                }
+
+                this.classes.series = values;
+                this.classes.options.labels = labels;
                 this.classes.loading = false;
             }
         },
@@ -395,9 +450,38 @@ export default {
         customData: {
             deep: true,
             handler(value) {
-                this.custom.series = Object.values(value);
-                this.custom.options.labels = Object.keys(value);
+                let values = [];
+                let labels = [];
+
+                for (const key in value) {
+                    if (value.hasOwnProperty(key)) {
+                        const element = value[key];
+                        values.push(element.value);
+                        labels.push(
+                            this.raw.assetClasses[element.asset_class_id].name
+                        );
+                    }
+                }
+
+                this.custom.series = values;
+                this.custom.options.labels = labels;
                 this.custom.loading = false;
+            }
+        },
+        form: {
+            deep: true,
+            handler(value) {
+                this.custom.loading = true;
+
+                let newCustomData = {};
+                for (const key in value) {
+                    if (value.hasOwnProperty(key)) {
+                        const element = value[key];
+
+                        newCustomData[element.asset_class_id] = element.value;
+                    }
+                }
+                this.customData = newCustomData;
             }
         }
     }

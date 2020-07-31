@@ -3480,6 +3480,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _api_yfinance__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../api/yfinance */ "./resources/js/api/yfinance.js");
 
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -3491,12 +3497,6 @@ function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.it
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -3510,9 +3510,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   data: function data() {
     return {
-      purchases: [],
-      quotes: {},
-      fixed: [],
+      raw: {
+        purchases: [],
+        quotes: {},
+        fixed: [],
+        assetClasses: []
+      },
       generalData: {
         fixed: 0,
         variable: 0
@@ -3520,9 +3523,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       classesData: {},
       detailData: {},
       customData: {},
-      form: {
-        field: 0
-      },
+      form: {},
       general: {
         loading: true,
         series: [0, 0],
@@ -3697,54 +3698,218 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
     };
   },
-  created: function created() {
-    this.getPurchases();
-    this.getFixedInterestInvestments();
-  },
+  beforeMount: function () {
+    var _beforeMount = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return this.getRawData();
+
+            case 2:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function beforeMount() {
+      return _beforeMount.apply(this, arguments);
+    }
+
+    return beforeMount;
+  }(),
+  created: function created() {},
   methods: {
-    getPurchases: function getPurchases() {
+    getRawData: function getRawData() {
       var _this = this;
 
-      axios.get("/api/purchases").then(function (response) {
-        _this.purchases = response.data;
-      });
-    },
-    getFixedInterestInvestments: function getFixedInterestInvestments() {
-      var _this2 = this;
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
+        var assetClassesResponse, purchasesResponse, fixedResponse, mappedClasses, symbols, uniqueSymbols, quotes, totalFixed, totalVariable, byIndex, byClasses, indexKeys, sortedByIndex, classesKeys, sortedByClasses;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                _context2.next = 3;
+                return axios.get("/api/asset-classes");
 
-      axios.get("/api/fixed-interest").then(function (response) {
-        _this2.fixed = response.data;
-      });
+              case 3:
+                assetClassesResponse = _context2.sent;
+                _context2.next = 6;
+                return axios.get("/api/purchases");
+
+              case 6:
+                purchasesResponse = _context2.sent;
+                _context2.next = 9;
+                return axios.get("/api/fixed-interest");
+
+              case 9:
+                fixedResponse = _context2.sent;
+                // Map classes to object
+                mappedClasses = {
+                  0: {
+                    name: "Other",
+                    id: 0
+                  }
+                };
+                assetClassesResponse.data.map(function (el) {
+                  mappedClasses[el.id] = {
+                    name: el.name,
+                    id: el.id
+                  };
+                });
+                _this.raw.assetClasses = mappedClasses;
+                _this.raw.purchases = purchasesResponse.data;
+                _this.raw.fixed = fixedResponse.data;
+                symbols = purchasesResponse.data.map(function (element) {
+                  return element.symbol;
+                });
+                uniqueSymbols = _toConsumableArray(new Set(symbols));
+                _context2.next = 19;
+                return _this.getMarketQuotes(uniqueSymbols.sort());
+
+              case 19:
+                quotes = _context2.sent;
+                _this.raw.quotes = quotes;
+                totalFixed = 0;
+                totalVariable = 0;
+                byIndex = {};
+                byClasses = {};
+
+                _this.raw.purchases.forEach(function (element) {
+                  var marketPrice = Number(element.shares) * Number(quotes[element.symbol]);
+                  totalVariable += marketPrice;
+
+                  if (!byIndex.hasOwnProperty(element.symbol)) {
+                    byIndex[element.symbol] = 0;
+                  }
+
+                  byIndex[element.symbol] += marketPrice;
+
+                  if (element.asset_class !== null) {
+                    if (!byClasses.hasOwnProperty(element.asset_class_id)) {
+                      byClasses[element.asset_class_id] = 0;
+                    }
+
+                    byClasses[element.asset_class_id] += marketPrice;
+                  } else {
+                    if (!byClasses.hasOwnProperty("0")) {
+                      byClasses["0"] = 0;
+                    }
+
+                    byClasses["0"] += marketPrice;
+                  }
+                });
+
+                _this.raw.fixed.forEach(function (element) {
+                  var amount = Number(element.amount);
+
+                  if (!byIndex.hasOwnProperty(element.name)) {
+                    byIndex[element.name] = 0;
+                  }
+
+                  byIndex[element.name] += amount;
+                  totalFixed += amount;
+
+                  if (element.asset_class !== null) {
+                    if (!byClasses.hasOwnProperty(element.asset_class_id)) {
+                      byClasses[element.asset_class_id] = 0;
+                    }
+
+                    byClasses[element.asset_class_id] += amount;
+                  } else {
+                    if (!byClasses.hasOwnProperty("0")) {
+                      byClasses["0"] = 0;
+                    }
+
+                    byClasses["0"] += amount;
+                  }
+                }); // transform to fixed 2
+
+
+                totalFixed = totalFixed.toFixed(2);
+                totalVariable = totalVariable.toFixed(2);
+                indexKeys = Object.keys(byIndex);
+                indexKeys.sort(function (a, b) {
+                  return Number(byIndex[b].toFixed(2)) - Number(byIndex[a].toFixed(2));
+                });
+                sortedByIndex = {};
+                indexKeys.forEach(function (key) {
+                  if (byIndex.hasOwnProperty(key)) {
+                    var element = Number(byIndex[key].toFixed(2));
+                    sortedByIndex[key] = element;
+                  }
+                });
+                classesKeys = Object.keys(byClasses);
+                classesKeys.sort(function (a, b) {
+                  return Number(byClasses[b].toFixed(2)) - Number(byClasses[a].toFixed(2));
+                });
+                sortedByClasses = {};
+                classesKeys.forEach(function (key, index) {
+                  if (byClasses.hasOwnProperty(key)) {
+                    var element = Number(byClasses[key].toFixed(2));
+                    sortedByClasses[index] = {
+                      asset_class_id: key,
+                      value: element
+                    };
+                  }
+                });
+                _this.generalData = {
+                  fixed: totalFixed,
+                  variable: totalVariable
+                };
+                _this.classesData = sortedByClasses;
+                _this.detailData = sortedByIndex;
+                _this.customData = _objectSpread({}, sortedByClasses); // this.form = { ...sortedByClasses };
+
+                _context2.next = 46;
+                break;
+
+              case 43:
+                _context2.prev = 43;
+                _context2.t0 = _context2["catch"](0);
+                alert("Something went wrong :( maybe a refresh would help (?)");
+
+              case 46:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 43]]);
+      }))();
     },
     getMarketQuotes: function getMarketQuotes(symbols) {
-      var _this3 = this;
+      var _this2 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
         var getQuotes, quotes, _response$data, _response$data$quoteR, response, today, newQuotes;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 if (!(symbols.length > 0)) {
-                  _context.next = 18;
+                  _context3.next = 20;
                   break;
                 }
 
                 getQuotes = localStorage.getItem("get-quotes");
 
                 if (!getQuotes) {
-                  _context.next = 6;
+                  _context3.next = 6;
                   break;
                 }
 
                 quotes = JSON.parse(getQuotes);
-                _context.next = 17;
+                _context3.next = 17;
                 break;
 
               case 6:
-                _context.prev = 6;
-                _context.next = 9;
+                _context3.prev = 6;
+                _context3.next = 9;
                 return _api_yfinance__WEBPACK_IMPORTED_MODULE_2__["default"].get("market/get-quotes", {
                   params: {
                     region: "US",
@@ -3754,124 +3919,50 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 9:
-                response = _context.sent;
+                response = _context3.sent;
                 quotes = response === null || response === void 0 ? void 0 : (_response$data = response.data) === null || _response$data === void 0 ? void 0 : (_response$data$quoteR = _response$data.quoteResponse) === null || _response$data$quoteR === void 0 ? void 0 : _response$data$quoteR.result;
 
                 if (undefined !== null && undefined !== void 0 ? undefined : quotes) {
                   localStorage.setItem("get-quotes", JSON.stringify(quotes));
                   today = moment().format("LLLL");
                   localStorage.setItem("get-quotes-updated", today);
-                  _this3.lastUpdate = today;
+                  _this2.lastUpdate = today;
                 }
 
-                _context.next = 17;
+                _context3.next = 17;
                 break;
 
               case 14:
-                _context.prev = 14;
-                _context.t0 = _context["catch"](6);
-                _this3.snackbar = _objectSpread(_objectSpread({}, _this3.snackbar), {}, {
+                _context3.prev = 14;
+                _context3.t0 = _context3["catch"](6);
+                _this2.snackbar = _objectSpread(_objectSpread({}, _this2.snackbar), {}, {
                   show: true,
                   text: "Somenthing went wrong reaching Yahoo API, try again",
                   color: "error"
                 });
 
               case 17:
+                newQuotes = {};
+
                 if (undefined !== null && undefined !== void 0 ? undefined : quotes) {
-                  newQuotes = {};
                   quotes.map(function (quote) {
                     var symbol = quote === null || quote === void 0 ? void 0 : quote.symbol;
                     newQuotes[symbol] = Number((quote === null || quote === void 0 ? void 0 : quote.regularMarketPrice) ? quote === null || quote === void 0 ? void 0 : quote.regularMarketPrice : 0);
                   });
-                  _this3.quotes = newQuotes;
                 }
 
-              case 18:
+                return _context3.abrupt("return", newQuotes);
+
+              case 20:
               case "end":
-                return _context.stop();
+                return _context3.stop();
             }
           }
-        }, _callee, null, [[6, 14]]);
+        }, _callee3, null, [[6, 14]]);
       }))();
     }
   },
   watch: {
-    fixed: {
-      handler: function handler(value) {
-        this.generalData["fixed"] = value.reduce(function (acumulator, current) {
-          return acumulator + Number(current.amount);
-        }, 0).toFixed(2);
-      }
-    },
-    purchases: {
-      handler: function handler(value) {
-        var symbols = value.map(function (element) {
-          return element.symbol;
-        });
-
-        var uniqueSymbols = _toConsumableArray(new Set(symbols));
-
-        this.getMarketQuotes(uniqueSymbols.sort());
-      }
-    },
-    quotes: {
-      handler: function handler(value) {
-        this.generalData["variable"] = this.purchases.reduce(function (acumulator, current) {
-          return acumulator + Number(current.shares) * Number(value[current.symbol]);
-        }, 0).toFixed(2);
-        var newClassesData = {};
-        var newDetailData = {};
-        this.purchases.forEach(function (element) {
-          var marketPrice = Number(element.shares) * Number(value[element.symbol]);
-
-          if (!newDetailData.hasOwnProperty(element.symbol)) {
-            newDetailData[element.symbol] = 0;
-          }
-
-          newDetailData[element.symbol] += marketPrice;
-
-          if (element.asset_class !== null) {
-            if (!newClassesData.hasOwnProperty(element.asset_class.name)) {
-              newClassesData[element.asset_class.name] = 0;
-            }
-
-            newClassesData[element.asset_class.name] += marketPrice;
-          } else {
-            if (!newClassesData.hasOwnProperty("Other")) {
-              newClassesData["Other"] = 0;
-            }
-
-            newClassesData["Other"] += marketPrice;
-          }
-        });
-        this.fixed.forEach(function (element) {
-          var amount = Number(element.amount);
-
-          if (!newDetailData.hasOwnProperty(element.name)) {
-            newDetailData[element.name] = 0;
-          }
-
-          newDetailData[element.name] += amount;
-
-          if (element.asset_class !== null) {
-            if (!newClassesData.hasOwnProperty(element.asset_class.name)) {
-              newClassesData[element.asset_class.name] = 0;
-            }
-
-            newClassesData[element.asset_class.name] += amount;
-          } else {
-            if (!newClassesData.hasOwnProperty("Other")) {
-              newClassesData["Other"] = 0;
-            }
-
-            newClassesData["Other"] += amount;
-          }
-        });
-        this.classesData = newClassesData;
-        this.customData = newClassesData;
-        this.detailData = newDetailData;
-      }
-    },
     generalData: {
       deep: true,
       handler: function handler(value) {
@@ -3882,8 +3973,19 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     classesData: {
       deep: true,
       handler: function handler(value) {
-        this.classes.series = Object.values(value);
-        this.classes.options.labels = Object.keys(value);
+        var values = [];
+        var labels = [];
+
+        for (var key in value) {
+          if (value.hasOwnProperty(key)) {
+            var element = value[key];
+            values.push(element.value);
+            labels.push(this.raw.assetClasses[element.asset_class_id].name);
+          }
+        }
+
+        this.classes.series = values;
+        this.classes.options.labels = labels;
         this.classes.loading = false;
       }
     },
@@ -3898,9 +4000,36 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     customData: {
       deep: true,
       handler: function handler(value) {
-        this.custom.series = Object.values(value);
-        this.custom.options.labels = Object.keys(value);
+        var values = [];
+        var labels = [];
+
+        for (var key in value) {
+          if (value.hasOwnProperty(key)) {
+            var element = value[key];
+            values.push(element.value);
+            labels.push(this.raw.assetClasses[element.asset_class_id].name);
+          }
+        }
+
+        this.custom.series = values;
+        this.custom.options.labels = labels;
         this.custom.loading = false;
+      }
+    },
+    form: {
+      deep: true,
+      handler: function handler(value) {
+        this.custom.loading = true;
+        var newCustomData = {};
+
+        for (var key in value) {
+          if (value.hasOwnProperty(key)) {
+            var element = value[key];
+            newCustomData[element.asset_class_id] = element.value;
+          }
+        }
+
+        this.customData = newCustomData;
       }
     }
   }
@@ -46338,30 +46467,41 @@ var render = function() {
                   _c(
                     "v-row",
                     [
-                      _c("v-col", { attrs: { cols: "12", md: "8" } }, [
-                        _c(
-                          "div",
-                          { staticClass: "mx-5" },
-                          [
-                            _c("v-text-field", {
-                              attrs: {
-                                label: "Emerging Market Equities*",
-                                type: "number",
-                                prefix: "$",
-                                required: ""
-                              },
-                              model: {
-                                value: _vm.form.field,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.form, "field", $$v)
-                                },
-                                expression: "form.field"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]),
+                      _c(
+                        "v-col",
+                        { attrs: { cols: "12", md: "8" } },
+                        _vm._l(_vm.raw.assetClasses, function(asset, name) {
+                          return _c(
+                            "v-col",
+                            { key: asset, attrs: { cols: "4" } },
+                            [
+                              _c(
+                                "div",
+                                { staticClass: "mx-5" },
+                                [
+                                  _c("v-text-field", {
+                                    attrs: {
+                                      label: asset,
+                                      type: "number",
+                                      prefix: "$",
+                                      required: ""
+                                    },
+                                    model: {
+                                      value: _vm.form[name],
+                                      callback: function($$v) {
+                                        _vm.$set(_vm.form, name, $$v)
+                                      },
+                                      expression: "form[name]"
+                                    }
+                                  })
+                                ],
+                                1
+                              )
+                            ]
+                          )
+                        }),
+                        1
+                      ),
                       _vm._v(" "),
                       _c("v-col", { attrs: { cols: "12", md: "4" } }, [
                         !_vm.custom.loading
