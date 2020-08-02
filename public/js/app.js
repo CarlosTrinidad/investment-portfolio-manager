@@ -3387,17 +3387,18 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     getConditionalFormat: function getConditionalFormat(value) {
       var day = moment__WEBPACK_IMPORTED_MODULE_0___default()(value, "YYYY-MM-DD", "es");
-      var diff = moment__WEBPACK_IMPORTED_MODULE_0___default()().diff(day, "days");
+      var diff = day.diff(moment__WEBPACK_IMPORTED_MODULE_0___default()(), "days");
+      console.log("getConditionalFormat -> diff", diff);
 
-      if (day.isSame(moment__WEBPACK_IMPORTED_MODULE_0___default()().format("YYYY-MM-DD", "day"))) {
+      if (moment__WEBPACK_IMPORTED_MODULE_0___default()().isSame(day.format("YYYY-MM-DD"), "day")) {
         // today
         return "orange--text";
-      } else if (day.isSameOrAfter(moment__WEBPACK_IMPORTED_MODULE_0___default()().format("YYYY-MM-DD", "day"))) {
-        //past
-        return "red--text";
-      } else if (diff <= 7 && diff > 0) {
+      } else if (diff <= 7 && diff >= 0) {
         // less than 7 days
         return "green--text";
+      } else if (moment__WEBPACK_IMPORTED_MODULE_0___default()().isAfter(day.format("YYYY-MM-DD"), "day")) {
+        //past
+        return "red--text";
       }
 
       return "";
@@ -3440,7 +3441,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         return;
       }
 
-      this.form.inputs.expiration_date = moment__WEBPACK_IMPORTED_MODULE_0___default()(this.form.inputs.start_date, "YYYY-MM-DD").add(Number(this.form.inputs.deadline), "days").format("YYYY-MM-DD");
+      if (!this.form.edit) {
+        this.form.inputs.expiration_date = moment__WEBPACK_IMPORTED_MODULE_0___default()(this.form.inputs.start_date, "YYYY-MM-DD").add(Number(this.form.inputs.deadline), "days").format("YYYY-MM-DD");
+      }
     },
     suggestGrossReturn: function suggestGrossReturn() {
       if (Number(this.form.inputs.deadline) <= 0) {
@@ -3480,6 +3483,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _api_yfinance__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../api/yfinance */ "./resources/js/api/yfinance.js");
 
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -3514,7 +3519,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         purchases: [],
         quotes: {},
         fixed: [],
-        assetClasses: []
+        assetClasses: [],
+        original: {}
+      },
+      aggregated: {
+        toInvest: 0,
+        total: 0,
+        totalWeight: 0
       },
       generalData: {
         fixed: 0,
@@ -3523,7 +3534,22 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       classesData: {},
       detailData: {},
       customData: {},
-      form: {},
+      form: {
+        headers: [{
+          text: "Asset Class",
+          value: "asset_class_name"
+        }, {
+          text: "Amount",
+          value: "amount"
+        }, {
+          text: "Weights",
+          value: "weight"
+        }, {
+          text: "Gain/Loss",
+          value: "diff"
+        }],
+        items: []
+      },
       general: {
         loading: true,
         series: [0, 0],
@@ -3638,7 +3664,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 currency: "USD",
                 minimumFractionDigits: 2
               });
-              return [seriesName, " - ", Number(opts.w.globals.seriesPercent[opts.seriesIndex]).toFixed(1) + "%", " : ", formatter.format(opts.w.globals.series[opts.seriesIndex])];
+              return [seriesName.substring(0, 10) + (seriesName.length >= 10 ? "..." : ""), " - ", Number(opts.w.globals.seriesPercent[opts.seriesIndex]).toFixed(1) + "%", " : ", formatter.format(opts.w.globals.series[opts.seriesIndex])];
             }
           },
           tooltip: {
@@ -3721,13 +3747,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     return beforeMount;
   }(),
-  created: function created() {},
   methods: {
     getRawData: function getRawData() {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
-        var assetClassesResponse, purchasesResponse, fixedResponse, mappedClasses, symbols, uniqueSymbols, quotes, totalFixed, totalVariable, byIndex, byClasses, indexKeys, sortedByIndex, classesKeys, sortedByClasses;
+        var assetClassesResponse, purchasesResponse, fixedResponse, mappedClasses, symbols, uniqueSymbols, quotes, totalFixed, totalVariable, byIndex, byClasses, total, indexKeys, sortedByIndex, classesKeys, sortedByClasses, rows, totalWeight, key, element, value, weight;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -3830,6 +3855,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 }); // transform to fixed 2
 
 
+                total = totalFixed + totalVariable;
                 totalFixed = totalFixed.toFixed(2);
                 totalVariable = totalVariable.toFixed(2);
                 indexKeys = Object.keys(byIndex);
@@ -3863,22 +3889,47 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 };
                 _this.classesData = sortedByClasses;
                 _this.detailData = sortedByIndex;
-                _this.customData = _objectSpread({}, sortedByClasses); // this.form = { ...sortedByClasses };
+                _this.customData = _objectSpread({}, byClasses);
+                _this.raw.original = {
+                  classes: byClasses,
+                  total: total
+                };
+                rows = [];
+                totalWeight = 0;
 
-                _context2.next = 46;
+                for (key in mappedClasses) {
+                  if (mappedClasses.hasOwnProperty(key)) {
+                    element = mappedClasses[key];
+                    value = !!byClasses[element.id] ? byClasses[element.id] : 0;
+                    weight = value > 0 ? value / total * 100 : 0;
+                    totalWeight += weight;
+                    rows.push({
+                      asset_class_name: element.name,
+                      asset_class_id: element.id,
+                      amount: value,
+                      weight: weight,
+                      diff: 0
+                    });
+                  }
+                }
+
+                _this.form.items = rows;
+                _this.aggregated.total = total;
+                _this.aggregated.totalWeight = totalWeight;
+                _context2.next = 54;
                 break;
 
-              case 43:
-                _context2.prev = 43;
+              case 51:
+                _context2.prev = 51;
                 _context2.t0 = _context2["catch"](0);
-                alert("Something went wrong :( maybe a refresh would help (?)");
+                console.log("getRawData -> error", _context2.t0);
 
-              case 46:
+              case 54:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[0, 43]]);
+        }, _callee2, null, [[0, 51]]);
       }))();
     },
     getMarketQuotes: function getMarketQuotes(symbols) {
@@ -3960,6 +4011,57 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee3, null, [[6, 14]]);
       }))();
+    },
+    getConditionalFormat: function getConditionalFormat(val) {
+      var value = Number(val);
+
+      if (value < 0) {
+        return "red--text";
+      }
+
+      if (value > 0) {
+        return "green--text";
+      }
+
+      return "";
+    },
+    updateAmount: function updateAmount() {
+      var value = this.form.items;
+      var newTotal = 0;
+
+      if (this.aggregated.toInvest === 0) {
+        newTotal = Number(this.raw.original.total);
+      } else {
+        newTotal = Number(this.raw.original.total) + Number(this.aggregated.toInvest);
+      }
+
+      var newTotalWeight = 0;
+      var newItems = [];
+
+      var _iterator = _createForOfIteratorHelper(value),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var element = _step.value;
+
+          var newItem = _objectSpread({}, element);
+
+          var originalValue = this.raw.original.classes[newItem.asset_class_id] !== undefined ? Number(this.raw.original.classes[newItem.asset_class_id]) : 0;
+          newTotalWeight += Number(newItem.weight);
+          newItem.amount = Number(newTotal) * Number(newItem.weight) / 100;
+          newItem.diff = Number(newItem.amount) - Number(originalValue);
+          newItems.push(newItem);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      this.form.items = newItems;
+      this.aggregated.total = newTotal;
+      this.aggregated.totalWeight = newTotalWeight;
     }
   },
   watch: {
@@ -4006,8 +4108,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         for (var key in value) {
           if (value.hasOwnProperty(key)) {
             var element = value[key];
-            values.push(element.value);
-            labels.push(this.raw.assetClasses[element.asset_class_id].name);
+            values.push(element);
+            labels.push(this.raw.assetClasses[key].name);
           }
         }
 
@@ -4016,16 +4118,24 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         this.custom.loading = false;
       }
     },
-    form: {
+    "aggregated.toInvest": {
+      deep: true,
+      handler: function handler() {
+        this.updateAmount();
+      }
+    },
+    "form.items": {
       deep: true,
       handler: function handler(value) {
-        this.custom.loading = true;
         var newCustomData = {};
 
         for (var key in value) {
           if (value.hasOwnProperty(key)) {
             var element = value[key];
-            newCustomData[element.asset_class_id] = element.value;
+
+            if (element.amount > 0) {
+              newCustomData[key] = element.amount;
+            }
           }
         }
 
@@ -46304,7 +46414,7 @@ var render = function() {
                           !_vm.general.loading
                             ? _c(
                                 "div",
-                                { staticClass: "ma-5" },
+                                { staticClass: "ma-1" },
                                 [
                                   _c("vue-apex-charts", {
                                     attrs: {
@@ -46356,7 +46466,7 @@ var render = function() {
                           !_vm.classes.loading
                             ? _c(
                                 "div",
-                                { staticClass: "ma-5" },
+                                { staticClass: "ma-1" },
                                 [
                                   _c("vue-apex-charts", {
                                     attrs: {
@@ -46408,7 +46518,7 @@ var render = function() {
                           !_vm.detail.loading
                             ? _c(
                                 "div",
-                                { staticClass: "ma-5" },
+                                { staticClass: "ma-1" },
                                 [
                                   _c("vue-apex-charts", {
                                     attrs: {
@@ -46470,36 +46580,222 @@ var render = function() {
                       _c(
                         "v-col",
                         { attrs: { cols: "12", md: "8" } },
-                        _vm._l(_vm.raw.assetClasses, function(asset, name) {
-                          return _c(
-                            "v-col",
-                            { key: asset, attrs: { cols: "4" } },
-                            [
-                              _c(
-                                "div",
-                                { staticClass: "mx-5" },
-                                [
-                                  _c("v-text-field", {
-                                    attrs: {
-                                      label: asset,
-                                      type: "number",
-                                      prefix: "$",
-                                      required: ""
+                        [
+                          _c("v-col", { attrs: { cols: "12", md: "3" } }, [
+                            _c(
+                              "div",
+                              { staticClass: "mx-1" },
+                              [
+                                _c("v-text-field", {
+                                  attrs: {
+                                    label: "Amount to invest",
+                                    type: "number",
+                                    prefix: "$",
+                                    required: ""
+                                  },
+                                  model: {
+                                    value: _vm.aggregated.toInvest,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.aggregated, "toInvest", $$v)
                                     },
-                                    model: {
-                                      value: _vm.form[name],
-                                      callback: function($$v) {
-                                        _vm.$set(_vm.form, name, $$v)
+                                    expression: "aggregated.toInvest"
+                                  }
+                                })
+                              ],
+                              1
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("v-col", { attrs: { cols: "12" } }, [
+                            _c(
+                              "div",
+                              { staticClass: "mx-5" },
+                              [
+                                _c("v-data-table", {
+                                  attrs: {
+                                    headers: _vm.form.headers,
+                                    items: _vm.form.items,
+                                    "disable-pagination": true,
+                                    "hide-default-footer": true
+                                  },
+                                  scopedSlots: _vm._u([
+                                    {
+                                      key: "body.append",
+                                      fn: function() {
+                                        return [
+                                          _c("tr", [
+                                            _c("td", [_vm._v("-")]),
+                                            _vm._v(" "),
+                                            _c("td", [
+                                              _vm._v(
+                                                "\n                                                " +
+                                                  _vm._s(
+                                                    _vm._f("toCurrency")(
+                                                      Number(
+                                                        _vm.aggregated.total
+                                                      )
+                                                    )
+                                                  ) +
+                                                  "\n                                            "
+                                              )
+                                            ]),
+                                            _vm._v(" "),
+                                            _c("td", [
+                                              _vm._v(
+                                                "\n                                                " +
+                                                  _vm._s(
+                                                    _vm._f("toDecimal")(
+                                                      Number(
+                                                        _vm.aggregated
+                                                          .totalWeight
+                                                      )
+                                                    )
+                                                  ) +
+                                                  "%\n                                            "
+                                              )
+                                            ]),
+                                            _vm._v(" "),
+                                            _c("td", [_vm._v("-")])
+                                          ])
+                                        ]
                                       },
-                                      expression: "form[name]"
+                                      proxy: true
+                                    },
+                                    {
+                                      key: "item.amount",
+                                      fn: function(ref) {
+                                        var item = ref.item
+                                        return [
+                                          _vm._v(
+                                            "\n                                        " +
+                                              _vm._s(
+                                                _vm._f("toCurrency")(
+                                                  Number(item.amount)
+                                                )
+                                              ) +
+                                              "\n                                    "
+                                          )
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      key: "item.weight",
+                                      fn: function(ref) {
+                                        var item = ref.item
+                                        return [
+                                          _c(
+                                            "v-edit-dialog",
+                                            {
+                                              attrs: {
+                                                "return-value": item.weight,
+                                                large: ""
+                                              },
+                                              on: {
+                                                "update:returnValue": function(
+                                                  $event
+                                                ) {
+                                                  return _vm.$set(
+                                                    item,
+                                                    "weight",
+                                                    $event
+                                                  )
+                                                },
+                                                "update:return-value": function(
+                                                  $event
+                                                ) {
+                                                  return _vm.$set(
+                                                    item,
+                                                    "weight",
+                                                    $event
+                                                  )
+                                                },
+                                                save: _vm.updateAmount
+                                              },
+                                              scopedSlots: _vm._u(
+                                                [
+                                                  {
+                                                    key: "input",
+                                                    fn: function() {
+                                                      return [
+                                                        _c("v-text-field", {
+                                                          attrs: {
+                                                            label: "Edit",
+                                                            "single-line": "",
+                                                            autofocus: ""
+                                                          },
+                                                          model: {
+                                                            value: item.weight,
+                                                            callback: function(
+                                                              $$v
+                                                            ) {
+                                                              _vm.$set(
+                                                                item,
+                                                                "weight",
+                                                                $$v
+                                                              )
+                                                            },
+                                                            expression:
+                                                              "item.weight"
+                                                          }
+                                                        })
+                                                      ]
+                                                    },
+                                                    proxy: true
+                                                  }
+                                                ],
+                                                null,
+                                                true
+                                              )
+                                            },
+                                            [
+                                              _c("div", [
+                                                _vm._v(
+                                                  "\n                                                " +
+                                                    _vm._s(
+                                                      _vm._f("toDecimal")(
+                                                        Number(item.weight)
+                                                      )
+                                                    ) +
+                                                    "%\n                                            "
+                                                )
+                                              ])
+                                            ]
+                                          )
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      key: "item.diff",
+                                      fn: function(ref) {
+                                        var item = ref.item
+                                        return [
+                                          _c(
+                                            "span",
+                                            {
+                                              class: _vm.getConditionalFormat(
+                                                item.diff
+                                              )
+                                            },
+                                            [
+                                              _vm._v(
+                                                _vm._s(
+                                                  _vm._f("toCurrency")(
+                                                    Number(item.diff)
+                                                  )
+                                                )
+                                              )
+                                            ]
+                                          )
+                                        ]
+                                      }
                                     }
-                                  })
-                                ],
-                                1
-                              )
-                            ]
-                          )
-                        }),
+                                  ])
+                                })
+                              ],
+                              1
+                            )
+                          ])
+                        ],
                         1
                       ),
                       _vm._v(" "),

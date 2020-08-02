@@ -9,7 +9,13 @@ export default {
                 purchases: [],
                 quotes: {},
                 fixed: [],
-                assetClasses: []
+                assetClasses: [],
+                original: {}
+            },
+            aggregated: {
+                toInvest: 0,
+                total: 0,
+                totalWeight: 0
             },
             generalData: {
                 fixed: 0,
@@ -18,7 +24,15 @@ export default {
             classesData: {},
             detailData: {},
             customData: {},
-            form: {},
+            form: {
+                headers: [
+                    { text: "Asset Class", value: "asset_class_name" },
+                    { text: "Amount", value: "amount" },
+                    { text: "Weights", value: "weight" },
+                    { text: "Gain/Loss", value: "diff" }
+                ],
+                items: []
+            },
             general: {
                 loading: true,
                 series: [0, 0],
@@ -141,7 +155,7 @@ export default {
                             });
 
                             return [
-                                seriesName,
+                                seriesName.substring(0, 10)+ (seriesName.length >= 10? "..." : ""),
                                 " - ",
                                 Number(
                                     opts.w.globals.seriesPercent[
@@ -217,7 +231,6 @@ export default {
     beforeMount: async function() {
         await this.getRawData();
     },
-    created() {},
     methods: {
         async getRawData() {
             try {
@@ -303,7 +316,7 @@ export default {
                 });
 
                 // transform to fixed 2
-
+                let total = totalFixed + totalVariable;
                 totalFixed = totalFixed.toFixed(2);
                 totalVariable = totalVariable.toFixed(2);
                 let indexKeys = Object.keys(byIndex);
@@ -350,10 +363,36 @@ export default {
                 this.classesData = sortedByClasses;
                 this.detailData = sortedByIndex;
 
-                this.customData = { ...sortedByClasses };
-                // this.form = { ...sortedByClasses };
+                this.customData = { ...byClasses };
+                this.raw.original = {
+                    classes: byClasses,
+                    total: total
+                };
+
+                let rows = [];
+                let totalWeight = 0;
+                for (const key in mappedClasses) {
+                    if (mappedClasses.hasOwnProperty(key)) {
+                        const element = mappedClasses[key];
+                        let value = !!byClasses[element.id]
+                            ? byClasses[element.id]
+                            : 0;
+                        let weight = value > 0 ? (value / total) * 100 : 0;
+                        totalWeight += weight;
+                        rows.push({
+                            asset_class_name: element.name,
+                            asset_class_id: element.id,
+                            amount: value,
+                            weight: weight,
+                            diff: 0
+                        });
+                    }
+                }
+                this.form.items = rows;
+                this.aggregated.total = total;
+                this.aggregated.totalWeight = totalWeight;
             } catch (error) {
-                alert("Something went wrong :( maybe a refresh would help (?)");
+                console.log("getRawData -> error", error);
             }
         },
         async getMarketQuotes(symbols) {
@@ -405,6 +444,51 @@ export default {
                 }
                 return newQuotes;
             }
+        },
+        getConditionalFormat(val) {
+            let value = Number(val);
+            if (value < 0) {
+                return "red--text";
+            }
+            if (value > 0) {
+                return "green--text";
+            }
+            return "";
+        },
+        updateAmount() {
+            let value = this.form.items;
+            let newTotal = 0;
+
+            if (this.aggregated.toInvest === 0) {
+                newTotal = Number(this.raw.original.total);
+            } else {
+                newTotal =
+                    Number(this.raw.original.total) +
+                    Number(this.aggregated.toInvest);
+            }
+
+            let newTotalWeight = 0;
+            let newItems = [];
+
+            for (const element of value) {
+                let newItem = { ...element };
+                let originalValue =
+                    this.raw.original.classes[newItem.asset_class_id] !==
+                    undefined
+                        ? Number(
+                              this.raw.original.classes[newItem.asset_class_id]
+                          )
+                        : 0;
+                newTotalWeight += Number(newItem.weight);
+                newItem.amount =
+                    (Number(newTotal) * Number(newItem.weight)) / 100;
+                newItem.diff = Number(newItem.amount) - Number(originalValue);
+                newItems.push(newItem);
+            }
+
+            this.form.items = newItems;
+            this.aggregated.total = newTotal;
+            this.aggregated.totalWeight = newTotalWeight;
         }
     },
     watch: {
@@ -456,10 +540,8 @@ export default {
                 for (const key in value) {
                     if (value.hasOwnProperty(key)) {
                         const element = value[key];
-                        values.push(element.value);
-                        labels.push(
-                            this.raw.assetClasses[element.asset_class_id].name
-                        );
+                        values.push(element);
+                        labels.push(this.raw.assetClasses[key].name);
                     }
                 }
 
@@ -468,17 +550,22 @@ export default {
                 this.custom.loading = false;
             }
         },
-        form: {
+        "aggregated.toInvest": {
+            deep: true,
+            handler() {
+                this.updateAmount();
+            }
+        },
+        "form.items": {
             deep: true,
             handler(value) {
-                this.custom.loading = true;
-
                 let newCustomData = {};
                 for (const key in value) {
                     if (value.hasOwnProperty(key)) {
                         const element = value[key];
-
-                        newCustomData[element.asset_class_id] = element.value;
+                        if (element.amount > 0) {
+                            newCustomData[key] = element.amount;
+                        }
                     }
                 }
                 this.customData = newCustomData;

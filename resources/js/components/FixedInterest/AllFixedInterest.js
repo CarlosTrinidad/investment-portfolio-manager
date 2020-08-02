@@ -235,20 +235,19 @@ export default {
         },
         getConditionalFormat(value) {
             let day = moment(value, "YYYY-MM-DD", "es");
-            let diff = moment().diff(day, "days");
+            let diff = day.diff(moment(), "days");
+            console.log("getConditionalFormat -> diff", diff)
 
-            if (day.isSame(moment().format("YYYY-MM-DD", "day"))) {
+            if (moment().isSame(day.format("YYYY-MM-DD"), "day")) {
                 // today
                 return "orange--text";
-            } else if (
-                day.isSameOrAfter(moment().format("YYYY-MM-DD", "day"))
-            ) {
-                //past
-                return "red--text";
-            } else if (diff <= 7 && diff > 0) {
+            } else if (diff <= 7 && diff >= 0) {
                 // less than 7 days
                 return "green--text";
-            }
+            } else if (moment().isAfter(day.format("YYYY-MM-DD"), "day")) {
+                       //past
+                       return "red--text";
+                   } 
 
             return "";
         },
@@ -288,12 +287,14 @@ export default {
                 return;
             }
 
-            this.form.inputs.expiration_date = moment(
-                this.form.inputs.start_date,
-                "YYYY-MM-DD"
-            )
-                .add(Number(this.form.inputs.deadline), "days")
-                .format("YYYY-MM-DD");
+            if (!this.form.edit) {
+                this.form.inputs.expiration_date = moment(
+                    this.form.inputs.start_date,
+                    "YYYY-MM-DD"
+                )
+                    .add(Number(this.form.inputs.deadline), "days")
+                    .format("YYYY-MM-DD");
+            }
         },
         suggestGrossReturn() {
             if (Number(this.form.inputs.deadline) <= 0) {
